@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>EduAttend Dashboard</title>
-    <style>
-        /* ================= GLOBAL ================= */
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduAttend Dashboard</title>
+<style>
+/* ================= GLOBAL ================= */
 * {
     margin: 0;
     padding: 0;
@@ -14,7 +15,7 @@
 
 body {
     background: linear-gradient(135deg, #e8f0ff, #f6f9ff);
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     overflow-x: hidden;
 }
@@ -108,25 +109,28 @@ body {
     cursor: pointer;
     color: #2a4ea3;
     transition: .25s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .tabBtn:hover {
     background: #dbe8ff;
+    transform: translateY(-2px);
 }
 
 .tabBtn.active {
     background: linear-gradient(135deg, #538bff, #2a4ea3);
-    color: white;
+    color: #fff;
     border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* ================= FORM INPUTS ================= */
 .student-input {
-    width: 100%;
     padding: 12px;
     border-radius: 12px;
     border: 1px solid #cdd9f5;
     font-size: 15px;
+    width: 100%;
 }
 
 /* Add Button */
@@ -138,7 +142,9 @@ body {
     border-radius: 14px;
     cursor: pointer;
     font-size: 16px;
+    transition: .25s;
 }
+
 .add-btn:hover {
     opacity: .9;
 }
@@ -156,10 +162,8 @@ body {
     border-bottom: 1px solid #eef2ff;
 }
 
-/* ==================== MOBILE RESPONSIVE ==================== */
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 991px) {
-
-    /* Sidebar collapses */
     .sidebar {
         left: -260px;
     }
@@ -173,7 +177,6 @@ body {
         width: 100%;
     }
 
-    /* Menu button appears */
     .menu-toggle {
         display: block;
         position: fixed;
@@ -191,7 +194,6 @@ body {
 
 /* Mobile — Convert Table to Cards */
 @media (max-width: 768px) {
-
     #studentsTable thead {
         display: none;
     }
@@ -200,7 +202,7 @@ body {
         display: block;
         margin-bottom: 15px;
         background: #ffffff;
-        padding: 12px;
+        padding: 14px;
         border-radius: 14px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
@@ -216,171 +218,96 @@ body {
         font-weight: bold;
         color: #2a4ea3;
     }
-}
-
-    </style>
-</head>
-
-<body>
-    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
-
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="brand">EduAttend</div>
-
-        <div class="menu">
-            <button onclick="showPage('students')">الطلاب</button>
-            <button onclick="showPage('lessons')">الحصص</button>
-            <button onclick="logout()">تسجيل الخروج</button>
-        </div>
-    </div>
-
-    <!-- Content -->
-<style>
-/* ========== Responsive & Modern Styling ========== */
-
-/* Filter Buttons */
-.filter-container {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.tabBtn {
-    padding: 10px 18px;
-    border-radius: 30px;
-    background: #eef4ff;
-    color: #2a4ea3;
-    border: 1px solid #d2e2ff;
-    cursor: pointer;
-    font-size: 15px;
-    transition: .25s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.tabBtn:hover {
-    background: #dbe8ff;
-    transform: translateY(-2px);
-}
-
-.tabBtn.active {
-    background: linear-gradient(135deg, #538bff, #2a4ea3);
-    color: #fff;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-/* Form Inputs */
-.student-input {
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #cdd9f5;
-    font-size: 15px;
-    width: 100%;
-}
-
-/* Student Table */
-#studentsTable th, #studentsTable td {
-    font-size: 15px;
-    border-bottom: 1px solid #eef2ff;
-}
-
-@media (max-width: 768px) {
-    #studentsTable thead {
-        display: none;
-    }
-
-    #studentsTable tr {
-        display: block;
-        margin-bottom: 15px;
-        background: #ffffff;
-        padding: 12px;
-        border-radius: 14px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    #studentsTable td {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 0;
-    }
-
-    #studentsTable td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #2a4ea3;
-    }
-}
-
-/* Add Button */
-.add-btn {
-    background: linear-gradient(135deg, #2a4ea3, #538bff);
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: .25s;
-}
-
-.add-btn:hover {
-    opacity: .9;
 }
 </style>
+</head>
+<body>
 
+<div class="menu-toggle" onclick="toggleSidebar()">☰</div>
 
-<div id="students" class="page box" style="display:none;">
-    <div class="title">إدارة الطلاب</div>
+<div class="sidebar">
+    <div class="brand">EduAttend</div>
 
-    <!-- Filter Buttons -->
-    <div class="filter-container">
-        <button class="tabBtn active" onclick="filterLevel('all', this)">الكل</button>
-        <button class="tabBtn" onclick="filterLevel('first', this)">أولى ثانوي</button>
-        <button class="tabBtn" onclick="filterLevel('second', this)">ثاني ثانوي</button>
-        <button class="tabBtn" onclick="filterLevel('third', this)">ثالث ثانوي</button>
-    </div>
-
-    <!-- Add Student Form -->
-    <div class="box" style="margin-bottom:25px;">
-        <h3 style="margin-bottom:15px; color:#2a4ea3;">إضافة طالب جديد</h3>
-
-        <div style="display:flex; flex-direction:column; gap:15px;">
-            <input id="studentName" class="student-input" placeholder="اسم الطالب">
-            <input id="studentCode" class="student-input" placeholder="كود الطالب (اختياري)">
-            
-            <select id="studentLevel" class="student-input">
-                <option value="first">أولى ثانوي</option>
-                <option value="second">ثاني ثانوي</option>
-                <option value="third">ثالث ثانوي</option>
-            </select>
-
-            <button class="add-btn" onclick="addStudent()">إضافة طالب</button>
-        </div>
-    </div>
-
-    <!-- Students List -->
-    <div class="box">
-        <h3 style="margin-bottom:15px; color:#2a4ea3;">قائمة الطلاب</h3>
-
-        <table id="studentsTable" style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr style="background:#e8f0ff;">
-                    <th style="padding:12px;">الاسم</th>
-                    <th style="padding:12px;">الكود</th>
-                    <th style="padding:12px;">المرحلة</th>
-                    <th style="padding:12px;">إجراءات</th>
-                </tr>
-            </thead>
-            <tbody id="studentsList"></tbody>
-        </table>
+    <div class="menu">
+        <button onclick="showPage('students')">الطلاب</button>
+        <button onclick="showPage('lessons')">الحصص</button>
+        <button onclick="logout()">تسجيل الخروج</button>
     </div>
 </div>
 
+<div class="content">
+
+    <div id="students" class="page box" style="display:none;">
+        <div class="title">إدارة الطلاب</div>
+
+        <div class="filter-container">
+            <button class="tabBtn active" onclick="filterLevel('all', this)">الكل</button>
+            <button class="tabBtn" onclick="filterLevel('first', this)">أولى ثانوي</button>
+            <button class="tabBtn" onclick="filterLevel('second', this)">ثاني ثانوي</button>
+            <button class="tabBtn" onclick="filterLevel('third', this)">ثالث ثانوي</button>
+        </div>
+
+        <div class="box">
+            <h3 style="margin-bottom:15px; color:#2a4ea3;">إضافة طالب جديد</h3>
+
+            <div style="display:flex; flex-direction:column; gap:15px;">
+                <input id="studentName" class="student-input" placeholder="اسم الطالب">
+                <input id="studentCode" class="student-input" placeholder="كود الطالب (اختياري)">
+
+                <select id="studentLevel" class="student-input">
+                    <option value="first">أولى ثانوي</option>
+                    <option value="second">ثاني ثانوي</option>
+                    <option value="third">ثالث ثانوي</option>
+                </select>
+
+                <button class="add-btn" onclick="addStudent()">إضافة طالب</button>
+            </div>
+        </div>
+
+        <div class="box">
+            <h3 style="margin-bottom:15px; color:#2a4ea3;">قائمة الطلاب</h3>
+
+            <table id="studentsTable">
+                <thead>
+                    <tr style="background:#e8f0ff;">
+                        <th>الاسم</th>
+                        <th>الكود</th>
+                        <th>المرحلة</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="lessons" class="page box" style="display:none;">
+        <div class="title">قسم الحصص</div>
+        <p>إدارة الحصص: إضافة - حذف - تعديل</p>
+    </div>
+
+    <div id="welcome" class="box">
+        <div class="title">مرحباً بك في لوحة التحكم 🎉</div>
+        <p>اختار من القائمة على اليسار.</p>
+    </div>
+
+</div>
 
 <script>
+function showPage(page){
+    document.querySelectorAll('.page').forEach(p => p.style.display = "none");
+    document.getElementById(page).style.display = "block";
+    document.getElementById("welcome").style.display = "none";
+}
+
+function logout(){
+    alert("سيتم إضافة تسجيل الخروج عبر Firebase لاحقاً");
+}
+
+function toggleSidebar(){
+    document.querySelector(".sidebar").classList.toggle("active");
+}
+
 let students = [];
 
 function addStudent(){
@@ -388,101 +315,15 @@ function addStudent(){
     const code = studentCode.value.trim();
     const level = studentLevel.value;
 
-    if(name === ""){
-        alert("من فضلك اكتب اسم الطالب");
-        return;
-    }
+    if(name === ""){ alert("من فضلك اكتب اسم الطالب"); return; }
 
-    const student = {
-        id: Date.now(),
-        name,
-        code,
-        level
-    };
-
-    students.push(student);
+    students.push({ id: Date.now(), name, code, level });
     displayStudents();
-    clearForm();
-}
 
-function clearForm(){
     studentName.value = "";
     studentCode.value = "";
     studentLevel.value = "first";
 }
 
 function deleteStudent(id){
-    students = students.filter(s => s.id !== id);
-    displayStudents();
-}
-
-function filterLevel(level, btn){
-    // تغيير شكل الزر المختار
-    document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    displayStudents(level);
-}
-
-function displayStudents(level = "all"){
-    const tbody = document.getElementById("studentsList");
-    tbody.innerHTML = "";
-
-    students
-    .filter(s => level === "all" || s.level === level)
-    .forEach(s => {
-        tbody.innerHTML += `
-            <tr>
-                <td data-label="الاسم">${s.name}</td>
-                <td data-label="الكود">${s.code || "-"}</td>
-                <td data-label="المرحلة">${translateLevel(s.level)}</td>
-                <td data-label="إجراءات">
-                    <button onclick="deleteStudent(${s.id})"
-                        style="background:#ff4d4d; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer;">
-                        حذف
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function translateLevel(level){
-    if(level === "first") return "أولى ثانوي";
-    if(level === "second") return "ثاني ثانوي";
-    if(level === "third") return "ثالث ثانوي";
-}
-</script>
-
-
-        <div id="lessons" class="page box" style="display:none;">
-            <div class="title">قسم الحصص</div>
-            <p>هنا سيظهر إدارة الحصص: إضافة - حذف - تعديل</p>
-        </div>
-
-        <div id="welcome" class="box">
-            <div class="title">مرحباً بك في لوحة التحكم 🎉</div>
-            <p>اختار من القائمة على اليسار.</p>
-        </div>
-    </div>
-
-<script>
-    function showPage(page){
-        document.querySelectorAll('.page').forEach(p => p.style.display = "none");
-        document.getElementById(page).style.display = "block";
-        document.getElementById("welcome").style.display = "none";
-    }
-
-    function logout(){
-        alert("سيتم إضافة تسجيل الخروج لاحقاً عبر Firebase Auth");
-    }
-</script>
-    <script>
-function toggleSidebar(){
-    document.querySelector(".sidebar").classList.toggle("active");
-}
-</script>
-
-
-</body>
-</html>
+    students = students.filter(s => s
