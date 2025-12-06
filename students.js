@@ -1,14 +1,17 @@
 // ===== Firebase Init =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  updateDoc,
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
   deleteDoc,
   doc,
-  getDocs,
   query,
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -26,110 +29,81 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ===== عناصر DOM =====
-const studentsTable = document.getElementById("studentsTable");
-const addStudentBtn = document.getElementById("addStudentBtn");
-const filterLevel = document.getElementById("filterLevel");
 
-const modal = document.getElementById("studentModal");
-const modalTitle = document.getElementById("modalTitle");
-const studentName = document.getElementById("studentName");
-const studentPhone = document.getElementById("studentPhone");
-const studentLevel = document.getElementById("studentLevel");
-const saveStudent = document.getElementById("saveStudent");
-const closeModal = document.getElementById("closeModal");
 
-let editId = null;
-
-// ===== التحقق من تسجيل الدخول =====
+// ===== التأكد من تسجيل الدخول =====
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-  } else {
-    loadStudents();
-  }
+  if (!user) window.location.href = "login.html";
+  else loadStudents();
 });
 
-document.getElementById("logoutBtn").onclick = () => signOut(auth);
+
+
+// ===== زر تسجيل الخروج =====
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+
+
+// ===== زر إضافة طالب =====
+document.getElementById("addStudentBtn").addEventListener("click", () => {
+  window.location.href = "addStudent.html";
+});
+
+
 
 // ===== تحميل الطلاب =====
-async function loadStudents() {
-  studentsTable.innerHTML = "";
+async function loadStudents(filterLevel = "all") {
+  const table = document.getElementById("studentsTable");
+  table.innerHTML = "";
 
+  let ref = collection(db, "students");
   let q;
-  if (filterLevel.value === "all") {
-    q = collection(db, "students");
-  } else {
-    q = query(collection(db, "students"), where("level", "==", filterLevel.value));
-  }
 
-  const snap = await getDocs(q);
-  snap.forEach((docData) => {
-    const s = docData.data();
+  if (filterLevel !== "all")
+    q = query(ref, where("level", "==", filterLevel));
+  else
+    q = ref;
 
-    studentsTable.innerHTML += `
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach((docSnap) => {
+    const student = docSnap.data();
+
+    table.innerHTML += `
       <tr>
-        <td>${s.name}</td>
-        <td>${s.phone}</td>
-        <td>${getLevelName(s.level)}</td>
+        <td>${student.name}</td>
+        <td>${student.level}</td>
         <td>
-          <button class="action-btn edit" onclick="editStudent('${docData.id}', '${s.name}', '${s.phone}', '${s.level}')">تعديل</button>
-          <button class="action-btn delete" onclick="deleteStudent('${docData.id}')">حذف</button>
+          <button onclick="editStudent('${docSnap.id}')">تعديل</button>
+          <button class="del" onclick="deleteStudent('${docSnap.id}')">حذف</button>
         </td>
-      </tr>`;
+      </tr>
+    `;
   });
 }
 
-filterLevel.onchange = loadStudents;
 
-function getLevelName(level) {
-  return level === "1" ? "أولى ثانوي" : level === "2" ? "ثانية ثانوي" : "ثالثة ثانوي";
-}
 
-// ===== فتح مودال إضافة طالب =====
-addStudentBtn.onclick = () => {
-  modal.style.display = "flex";
-  modalTitle.textContent = "إضافة طالب";
-  studentName.value = "";
-  studentPhone.value = "";
-  studentLevel.value = "1";
-  editId = null;
-};
+// ===== التصفية حسب المستوى =====
+document.getElementById("levelFilter").addEventListener("change", (e) => {
+  loadStudents(e.target.value);
+});
 
-closeModal.onclick = () => (modal.style.display = "none");
 
-// ===== حفظ (إضافة / تعديل) طالب =====
-saveStudent.onclick = async () => {
-  const name = studentName.value.trim();
-  const phone = studentPhone.value.trim();
-  const level = studentLevel.value;
 
-  if (!name || !phone) return alert("برجاء إدخال البيانات كاملة");
+// ===== حذف طالب =====
+window.deleteStudent = async function (id) {
+  if (!confirm("هل أنت متأكد من حذف هذا الطالب؟")) return;
 
-  if (editId) {
-    await updateDoc(doc(db, "students", editId), { name, phone, level });
-  } else {
-    await addDoc(collection(db, "students"), { name, phone, level });
-  }
-
-  modal.style.display = "none";
+  await deleteDoc(doc(db, "students", id));
   loadStudents();
 };
 
-// ===== تعديل طالب =====
-window.editStudent = (id, name, phone, level) => {
-  editId = id;
-  modal.style.display = "flex";
-  modalTitle.textContent = "تعديل طالب";
-  studentName.value = name;
-  studentPhone.value = phone;
-  studentLevel.value = level;
-};
 
-// ===== حذف طالب =====
-window.deleteStudent = async (id) => {
-  if (confirm("هل تريد حذف الطالب؟")) {
-    await deleteDoc(doc(db, "students", id));
-    loadStudents();
-  }
+
+// ===== تعديل طالب =====
+window.editStudent = function (id) {
+  window.location.href = `editStudent.html?id=${id}`;
 };
