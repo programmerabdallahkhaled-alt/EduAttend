@@ -19,7 +19,7 @@ const db = getFirestore(app);
 // ===== التأكد من تسجيل الدخول =====
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   } else {
     loadDashboardNumbers();
   }
