@@ -107,6 +107,25 @@ if (loadStudentsBtn) {
   loadStudentsBtn.addEventListener("click", async () => {
     studentsTbody.innerHTML = "";
     const lessonId = lessonSelect.value;
+    // ===== تحميل الحضور السابق وتفعيل الـ checkbox =====
+const lessonKey = currentLesson.key;
+const attendanceSnap = await getDocs(
+  collection(db, "attendances", lessonKey, "students")
+);
+
+attendanceSnap.forEach(a => {
+  const data = a.data();
+  const studentId = a.id;
+
+  const checkbox = studentsTbody.querySelector(
+    `input[data-student-id="${studentId}"]`
+  );
+
+  if (checkbox && data.present === true) {
+    checkbox.checked = true;
+  }
+});
+
     if (!lessonId) {
       alert("اختر حصة أولاً");
       return;
