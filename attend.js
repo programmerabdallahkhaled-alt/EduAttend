@@ -42,7 +42,7 @@ let currentLesson = null;
 onAuthStateChanged(auth, user => {
   if (!user) {
     console.log("No user — redirecting to login");
-    window.location.href = "login.html";
+    window.location.href = "index.html";
     return;
   }
   currentUser = user;
