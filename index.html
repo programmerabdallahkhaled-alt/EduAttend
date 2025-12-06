@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول | EduAttend</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #1A73F3, #0094F3);
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-card {
+      width: 360px;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #1A73F3;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #1A73F3;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1A73F3, #0094F3);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-card">
+    <h2>تسجيل الدخول</h2>
+
+    <input id="email" type="email" placeholder="البريد الإلكتروني" />
+    <input id="password" type="password" placeholder="كلمة المرور" />
+
+    <button id="loginBtn">تسجيل دخول</button>
+
+    <div id="errorBox" class="error"></div>
+  </div>
+
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyADeo3Nc2lqGKtnr_UqfNEZB28aGUCQsrc",
+      authDomain: "eduattend-90a3d.firebaseapp.com",
+      projectId: "eduattend-90a3d",
+      storageBucket: "eduattend-90a3d.firebasestorage.app",
+      messagingSenderId: "1002840427136",
+      appId: "1:1002840427136:web:9de92f16a4303c8f117465",
+      measurementId: "G-681W27BZW3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const errorBox = document.getElementById("errorBox");
+
+    loginBtn.addEventListener("click", () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      errorBox.textContent = "";
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => {
+          window.location.href = "dashboard.html"; // ← حوّل للوحة التحكم
+        })
+        .catch((error) => {
+          if (error.code === 'auth/invalid-credential') {
+            errorBox.textContent = "بيانات تسجيل الدخول غير صحيحة";
+          } else if (error.code === 'auth/user-not-found') {
+            errorBox.textContent = "المستخدم غير موجود";
+          } else if (error.code === 'auth/wrong-password') {
+            errorBox.textContent = "كلمة المرور غير صحيحة";
+          } else {
+            errorBox.textContent = "حدث خطأ: " + error.message;
+          }
+        });
+    });
+  </script>
+
+</body>
+</html>
