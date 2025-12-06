@@ -29,7 +29,7 @@ const auth = getAuth(app);
 // حماية الصفحة
 // -------------------------------
 onAuthStateChanged(auth, (user) => {
-  if (!user) window.location.href = "login.html";
+  if (!user) window.location.href = "index.html";
 });
 
 // -------------------------------
