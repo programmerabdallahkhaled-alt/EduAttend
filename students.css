@@ -1,31 +1,25 @@
-/* ===== تنسيق عام متناسق مع التصميم الأساسي ===== */
+/* === إعدادات أساسية === */
 body {
   margin: 0;
-  font-family: 'Cairo', sans-serif;
-  background: #f7faff;
-  color: #1a1a1a;
-  display: flex;
-  height: 100vh;
+  font-family: "Tajawal", sans-serif;
+  background: #f7f7f7;
+  direction: rtl;
 }
 
-/* ===== الشريط الجانبي ===== */
+/* === الشريط الجانبي === */
 .sidebar {
-  width: 260px;
-  background: #f3f9ff;
-  border-left: 4px solid #3fa9f5;
+  width: 230px;
+  background: #fff;
+  height: 100vh;
+  position: fixed;
   padding: 20px;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  border-radius: 0 20px 20px 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.08);
 }
 
-.sidebar .logo {
+.logo {
+  margin-bottom: 25px;
   text-align: center;
-  font-size: 26px;
-  font-weight: bold;
-  color: #3fa9f5;
-  margin-bottom: 30px;
+  color: #333;
 }
 
 .sidebar ul {
@@ -35,26 +29,41 @@ body {
 }
 
 .sidebar ul li {
-  padding: 14px 18px;
-  margin: 10px 0;
-  background: #ffffff;
-  border-radius: 14px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.sidebar ul li:hover {
+  background: #eee;
+}
+
+.sidebar ul .active {
+  background: #4e73df;
+  color: #fff;
+}
+
+.logout {
+  margin-top: 30px;
+  width: 100%;
+  padding: 10px;
+  background: #d9534f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
   transition: 0.3s;
-  font-size: 18px;
-  border: 1px solid #e5e9ef;
 }
 
-.sidebar ul li:hover,
-.sidebar ul li.active {
-  background: #e9f4ff;
-  color: #3fa9f5;
-  border-color: #3fa9f5;
+.logout:hover {
+  background: #c9302c;
 }
 
-/* ===== المحتوى ===== */
+/* === المحتوى === */
 .content {
-  flex: 1;
+  margin-right: 250px;
   padding: 25px;
 }
 
@@ -62,175 +71,78 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
 }
 
 header h1 {
-  font-size: 28px;
-  color: #2a2a2a;
+  margin: 0;
+  font-size: 26px;
 }
 
-#logoutBtn {
-  background: #3fa9f5;
+header button {
+  background: #1cc88a;
   color: white;
-  border: none;
   padding: 10px 18px;
-  border-radius: 12px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-#logoutBtn:hover {
-  background: #1e90ff;
-}
-
-/* ===== شريط الأدوات ===== */
-.actions {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.actions button {
-  background: #3fa9f5;
-  color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 15px;
 }
 
-.actions button:hover {
-  background: #1e90ff;
+header button:hover {
+  background: #17a673;
 }
 
-.actions select {
-  padding: 10px 15px;
-  border-radius: 12px;
-  border: 1px solid #dce3eb;
-  background: white;
-  font-size: 16px;
-}
-
-/* ===== جدول الطلاب ===== */
-.studentsList table {
+/* === جدول الطلاب === */
+table {
   width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.studentsList th, .studentsList td {
-  padding: 14px;
-  border-bottom: 1px solid #eef2f6;
-  text-align: center;
-}
-
-.studentsList th {
-  background: #f3f9ff;
-  color: #3fa9f5;
-  font-size: 18px;
-}
-
-.studentsList tr:hover td {
-  background: #f9fcff;
-}
-
-/* ===== زرار الإجراءات ===== */
-.action-btn {
-  padding: 6px 12px;
+  margin-top: 25px;
+  background: #fff;
   border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
-  font-size: 14px;
+  overflow: hidden;
+  border-collapse: collapse;
 }
 
-.edit {
-  background: #ffce5c;
-}
-
-.edit:hover {
-  background: #ffbb29;
-}
-
-.delete {
-  background: #ff6d6d;
+thead {
+  background: #4e73df;
   color: white;
 }
 
-.delete:hover {
-  background: #ff4343;
-}
-
-/* ===== المودال ===== */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.35);
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  width: 380px;
-  background: white;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.modal-content input,
-.modal-content select {
+th, td {
   padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #dce3eb;
-  font-size: 16px;
-  background: #fdfdfd;
+  text-align: center;
+  border-bottom: 1px solid #eee;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+tr:hover td {
+  background: #fafafa;
 }
 
-.modal-actions button {
-  flex: 1;
-  margin: 0 5px;
-  padding: 10px 15px;
-  border-radius: 12px;
+td button {
+  padding: 6px 12px;
   border: none;
-  font-size: 16px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-.modal-actions #saveStudent {
-  background: #3fa9f5;
+td button:hover {
+  opacity: 0.8;
+}
+
+td .del {
+  background: #e74a3b;
   color: white;
 }
 
-.modal-actions #saveStudent:hover {
-  background: #1e90ff;
+td button:not(.del) {
+  background: #36b9cc;
+  color: white;
 }
 
-.modal-actions #closeModal {
-  background: #ddd;
-}
-
-.modal-actions #closeModal:hover {
-  background: #ccc;
+/* === الفلتر === */
+select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  background: white;
 }
