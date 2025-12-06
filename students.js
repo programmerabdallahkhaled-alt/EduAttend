@@ -87,41 +87,29 @@ async function loadStudents(filterLevel = "all") {
 
 
 // ===== التصفية حسب المستوى =====
-document.getElementById("levelFilter").addEventListener("change", async (e) => {
+document.getElementById("levelFilter").addEventListener("change", (e) => {
     const selected = e.target.value;
 
-    // لو اختار عرض الكل
+    // لو اختار "عرض الكل"
     if (selected === "all") {
         loadStudents("all");
         return;
     }
 
-    // نحمل الطلاب لمرة واحدة لاكتشاف مستوياتهم
-    const ref = collection(db, "students");
-    const snapshot = await getDocs(ref);
+    // نحول القيمة إلى رقم لأن Firestore مخزنها Number وليس String
+    const levelNumber = Number(selected);
 
-    let detectedLevel = null;
-
-    snapshot.forEach((docSnap) => {
-        const s = docSnap.data();
-
-        // لو الاسم المختار موجود في الاسم المكتوب داخل السجل
-        // مثال: "أولى" داخل "أولى ثانوي"
-        if (s.level.includes(selected) || selected.includes(s.level)) {
-            detectedLevel = s.level;
-        }
-    });
-
-    // لو ملقيناش مستوى مطابق → مفيش مشكلة → نعرض الكل
-    if (!detectedLevel) {
-        console.warn("لم يتم اكتشاف مستوى مطابق – سيتم عرض الكل");
+    // لو التحويل معرفش يجيب رقم → اعرض الكل
+    if (isNaN(levelNumber)) {
+        console.warn("قيمة المستوى غير صالحة – سيتم عرض الكل");
         loadStudents("all");
         return;
     }
 
-    // نحمل الطلاب بالرقم الحقيقي اللي في Firestore
-    loadStudents(detectedLevel);
+    // تحميل الطلاب حسب المستوى الرقمي
+    loadStudents(levelNumber);
 });
+
 
 
 
