@@ -8,6 +8,29 @@
     الجزء الأول: الهيكل (HTML) فقط.
     الجزء الثاني سيحتوي على الـ CSS والـ JavaScript ويُرسل حالاً بعد هذا الجزء.
   -->
+
+<!-- Firebase -->
+<script type="module">
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, getDocs } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Config بتاع مشروعك
+    const firebaseConfig = {
+        apiKey: "AIzaSyADeo3Nc2lqGKtnr_UqfNEZB28aGUCQsrc",
+        authDomain: "eduattend-90a3d.firebaseapp.com",
+        projectId: "eduattend-90a3d",
+        storageBucket: "eduattend-90a3d.firebasestorage.app",
+        messagingSenderId: "1002840427136",
+        appId: "1:1002840427136:web:9de92f16a4303c8f117465"
+    };
+
+    window.app = initializeApp(firebaseConfig);
+    window.db = getFirestore(app);
+</script>
+
+
 </head>
 <body>
 
