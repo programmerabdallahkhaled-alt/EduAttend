@@ -26,9 +26,26 @@ auth.onAuthStateChanged((user) => {
   if (!user) location.href = "index.html";
 });
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  auth.signOut();
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const auth = getAuth();
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "login.html";
+  } catch (error) {
+    console.log("Logout Error:", error);
+  }
 });
+
+});
+
+// ===== زر إضافة حصة =====
+document.getElementById("addLessonBtn").addEventListener("click", () => {
+  window.location.href = "addLesson.html";  
+});
+
 
 // -------------------------------
 // عناصر DOM
