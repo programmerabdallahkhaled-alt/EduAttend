@@ -6,38 +6,41 @@
   <title>الطلاب - نظام الغياب والحضور</title>
   <link rel="stylesheet" href="students.css" />
 </head>
+
 <body>
+
+  <!-- === Sidebar === -->
   <div class="sidebar">
     <h2 class="logo">EduAttend</h2>
     <ul>
-      <li class="active" onclick="location.href='students.html'">الطلاب</li>
-      <li onclick="location.href='lessons.html'">الحصص</li>
-      <li onclick="location.href='attend.html'">تسجيل الحضور</li>
+      <li class="active">الطلاب</li>
+      <li onclick="window.location.href='lessons.html'">الحصص</li>
+      <li onclick="window.location.href='attend.html'">تسجيل الحضور</li>
     </ul>
+
+    <button id="logoutBtn" class="logout">تسجيل الخروج</button>
   </div>
 
+  <!-- === Content === -->
   <div class="content">
     <header>
       <h1>إدارة الطلاب</h1>
-      <button id="logoutBtn">تسجيل الخروج</button>
+      <button id="addStudentBtn">+ إضافة طالب</button>
     </header>
 
-    <section class="actions">
-      <button id="addStudentBtn">إضافة طالب</button>
-      <select id="filterLevel">
+    <section>
+      <label>اختر المستوى:</label>
+      <select id="levelFilter">
         <option value="all">كل المستويات</option>
         <option value="1">أولى ثانوي</option>
         <option value="2">ثانية ثانوي</option>
         <option value="3">ثالثة ثانوي</option>
       </select>
-    </section>
 
-    <section class="studentsList">
       <table>
         <thead>
           <tr>
-            <th>الاسم</th>
-            <th>رقم الهاتف</th>
+            <th>اسم الطالب</th>
             <th>المستوى</th>
             <th>إجراءات</th>
           </tr>
@@ -47,25 +50,7 @@
     </section>
   </div>
 
-  <!-- نافذة إضافة/تعديل طالب -->
-  <div class="modal" id="studentModal">
-    <div class="modal-content">
-      <h2 id="modalTitle">إضافة طالب</h2>
-      <input type="text" id="studentName" placeholder="اسم الطالب" />
-      <input type="text" id="studentPhone" placeholder="رقم الهاتف" />
-      <select id="studentLevel">
-        <option value="1">أولى ثانوي</option>
-        <option value="2">ثانية ثانوي</option>
-        <option value="3">ثالثة ثانوي</option>
-      </select>
+  <script type="module" src="students.js"></script>
 
-      <div class="modal-actions">
-        <button id="saveStudent">حفظ</button>
-        <button id="closeModal">إلغاء</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="students.js"></script>
 </body>
 </html>
