@@ -1,4 +1,8 @@
-/* attend.css — تصميم فاتح وناعم متناسق مع المشروع */
+/* ================================
+   عام – الخط + الخلفية + Reset
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
 body {
   margin: 0;
   font-family: "Cairo", sans-serif;
@@ -6,9 +10,12 @@ body {
   color: #1a1a1a;
   display: flex;
   min-height: 100vh;
+  flex-direction: row;
 }
 
-/* Sidebar */
+/* ================================
+   Sidebar
+================================ */
 .sidebar {
   width: 240px;
   background: #f3f9ff;
@@ -27,7 +34,12 @@ body {
   margin-bottom: 24px;
 }
 
-.sidebar ul { list-style: none; padding: 0; margin: 0; }
+.sidebar ul { 
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+}
+
 .sidebar ul li {
   padding: 12px 14px;
   margin-bottom: 10px;
@@ -35,26 +47,45 @@ body {
   border-radius: 12px;
   cursor: pointer;
   border: 1px solid #e6eef7;
+  transition: 0.15s;
 }
-.sidebar ul li.active { background:#e9f4ff; color:#3fa9f5; border-color:#3fa9f5; }
+
+.sidebar ul li:hover {
+  background: #e6f2ff;
+}
+
+.sidebar ul li.active { 
+  background:#e9f4ff; 
+  color:#3fa9f5; 
+  border-color:#3fa9f5; 
+}
 
 .logout {
   margin-top: auto;
-  padding: 10px;
+  padding: 12px;
   border: none;
   border-radius: 10px;
   background: #ff6d6d;
   color: white;
   cursor: pointer;
+  font-size: 15px;
 }
 
-/* Content */
+.logout:hover { background: #ff4b4b; }
+
+/* ================================
+   Content
+================================ */
 .content {
   flex: 1;
   padding: 28px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Controls */
+/* ================================
+   Controls
+================================ */
 .controls {
   display: flex;
   gap: 14px;
@@ -62,16 +93,24 @@ body {
   margin-bottom: 18px;
   flex-wrap: wrap;
 }
+
 .controls label { font-size: 14px; }
-.controls select, .controls input[type="date"] {
+
+.controls select, 
+.controls input[type="date"] {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid #dbe8fb;
   background: white;
   font-size: 14px;
 }
-.dateWrap { display:flex; flex-direction: column; }
 
+.dateWrap { 
+  display:flex; 
+  flex-direction: column; 
+}
+
+/* Buttons */
 .btn {
   padding: 10px 16px;
   border-radius: 10px;
@@ -79,14 +118,16 @@ body {
   background: #3fa9f5;
   color: white;
   cursor: pointer;
+  font-size: 15px;
 }
 .btn.primary { background:#1e90ff; }
 .btn:hover { opacity: 0.95; }
 
-/* Students table */
-.studentsArea {
-  margin-top: 10px;
-}
+/* ================================
+   Students Table
+================================ */
+.studentsArea { margin-top: 10px; }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -95,21 +136,36 @@ table {
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(0,0,0,0.04);
 }
-thead { background: #e9f4ff; color: #3fa9f5; }
+
+thead { 
+  background: #e9f4ff; 
+  color: #3fa9f5; 
+  font-weight: 600;
+}
+
 th, td {
   padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid #f1f6fb;
+  font-size: 15px;
 }
 
-/* Switch */
+tr:hover {
+  background: #f6fbff;
+}
+
+/* ================================
+   Switch Button
+================================ */
 .switch {
   position: relative;
   width: 48px;
   height: 26px;
   display: inline-block;
 }
+
 .switch input { display: none; }
+
 .slider {
   position: absolute;
   cursor: pointer;
@@ -118,6 +174,7 @@ th, td {
   border-radius: 20px;
   transition: .2s;
 }
+
 .slider:before {
   content: "";
   position: absolute;
@@ -130,8 +187,53 @@ th, td {
   transition: .2s;
   box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
+
 .switch input:checked + .slider { background: #3fa9f5; }
 .switch input:checked + .slider:before { transform: translateX(22px); }
 
-/* Actions row */
-.actionsRow { margin-top: 14px; display:flex; gap:10px; justify-content:flex-end; }
+/* ================================
+   Actions row
+================================ */
+.actionsRow { 
+  margin-top: 14px; 
+  display:flex; 
+  gap:10px; 
+  justify-content:flex-end; 
+}
+
+/* ================================
+   Responsive
+================================ */
+@media (max-width: 900px) {
+  body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-radius: 0;
+    padding: 12px;
+  }
+  .sidebar ul {
+    display: flex;
+    gap: 10px;
+  }
+  .sidebar ul li {
+    white-space: nowrap;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  table {
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 6px;
+  }
+}
