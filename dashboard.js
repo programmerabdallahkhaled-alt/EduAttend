@@ -42,3 +42,14 @@ async function loadDashboardNumbers() {
     console.error("Error fetching counts:", error);
   }
 }
+
+// Sidebar navigation links
+const gotoDashboard = document.querySelector('#nav-dashboard');
+const gotoStudents = document.querySelector('#nav-students');
+const gotoLessons = document.querySelector('#nav-lessons');
+const gotoAttend = document.querySelector('#nav-attend');
+
+if (gotoDashboard) gotoDashboard.addEventListener('click', () => window.location.href = 'dashboard.html');
+if (gotoStudents) gotoStudents.addEventListener('click', () => window.location.href = 'students.html');
+if (gotoLessons) gotoLessons.addEventListener('click', () => window.location.href = 'lessons.html');
+if (gotoAttend) gotoAttend.addEventListener('click', () => window.location.href = 'attend.html');
