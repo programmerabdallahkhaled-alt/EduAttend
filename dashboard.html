@@ -4,82 +4,219 @@
     <meta charset="UTF-8">
     <title>EduAttend Dashboard</title>
     <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family: "Poppins", sans-serif;
-        }
+        /* ================= GLOBAL ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
 
-        body{
-            background: linear-gradient(135deg, #e8f0ff, #f6f9ff);
-            height:100vh;
-            display:flex;
-        }
+body {
+    background: linear-gradient(135deg, #e8f0ff, #f6f9ff);
+    height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+}
 
-        /* ===== Sidebar ===== */
-        .sidebar{
-            width:260px;
-            background:#f0f6ff;
-            border-right: 1px solid #d8e7ff;
-            border-radius: 0 20px 20px 0;
-            padding:25px;
-            display:flex;
-            flex-direction:column;
-            gap:30px;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.05);
-        }
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width: 260px;
+    background: #f0f6ff;
+    border-right: 1px solid #d8e7ff;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transition: .4s;
+    z-index: 100;
+}
 
-        .brand{
-            font-size:24px;
-            font-weight:bold;
-            color:#2a4ea3;
-            text-align:center;
-        }
+.brand {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2a4ea3;
+    text-align: center;
+}
 
-        .menu{
-            display:flex;
-            flex-direction:column;
-            gap:15px;
-            margin-top:20px;
-        }
+/* Sidebar Menu */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-        .menu button{
-            background:#e9f1ff;
-            border:none;
-            padding:14px 18px;
-            border-radius:14px;
-            text-align:right;
-            cursor:pointer;
-            font-size:16px;
-            color:#2a4ea3;
-            transition:0.3s;
-        }
+.menu button {
+    background: #e9f1ff;
+    border: none;
+    padding: 14px 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #2a4ea3;
+    transition: .3s;
+}
 
-        .menu button:hover{
-            background:#dbe8ff;
-            transform:translateX(-5px);
-        }
+.menu button:hover {
+    background: #dbe8ff;
+    transform: translateX(-5px);
+}
 
-        /* ===== Content ===== */
-        .content{
-            flex:1;
-            padding:35px;
-        }
+/* ================= CONTENT ================= */
+.content {
+    flex: 1;
+    padding: 35px;
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    transition: .4s;
+}
 
-        .title{
-            font-size:26px;
-            font-weight:bold;
-            color:#1f3b70;
-            margin-bottom:25px;
-        }
+.box {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+    margin-bottom: 25px;
+}
 
-        .box{
-            background:white;
-            padding:25px;
-            border-radius:20px;
-            box-shadow:0 5px 20px rgba(0,0,0,0.07);
-        }
+.title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #1f3b70;
+    margin-bottom: 20px;
+}
+
+/* ================= FILTER BUTTONS ================= */
+.filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tabBtn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    background: #eef4ff;
+    border: 1px solid #d2e2ff;
+    font-size: 15px;
+    cursor: pointer;
+    color: #2a4ea3;
+    transition: .25s;
+}
+
+.tabBtn:hover {
+    background: #dbe8ff;
+}
+
+.tabBtn.active {
+    background: linear-gradient(135deg, #538bff, #2a4ea3);
+    color: white;
+    border: none;
+}
+
+/* ================= FORM INPUTS ================= */
+.student-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cdd9f5;
+    font-size: 15px;
+}
+
+/* Add Button */
+.add-btn {
+    background: linear-gradient(135deg, #2a4ea3, #538bff);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.add-btn:hover {
+    opacity: .9;
+}
+
+/* ================= TABLE ================= */
+#studentsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#studentsTable th, 
+#studentsTable td {
+    padding: 12px;
+    font-size: 15px;
+    border-bottom: 1px solid #eef2ff;
+}
+
+/* ==================== MOBILE RESPONSIVE ==================== */
+@media (max-width: 991px) {
+
+    /* Sidebar collapses */
+    .sidebar {
+        left: -260px;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Menu button appears */
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        background: #2a4ea3;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        z-index: 101;
+        font-size: 18px;
+    }
+}
+
+/* Mobile — Convert Table to Cards */
+@media (max-width: 768px) {
+
+    #studentsTable thead {
+        display: none;
+    }
+
+    #studentsTable tr {
+        display: block;
+        margin-bottom: 15px;
+        background: #ffffff;
+        padding: 12px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    #studentsTable td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+    }
+
+    #studentsTable td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2a4ea3;
+    }
+}
 
     </style>
 </head>
