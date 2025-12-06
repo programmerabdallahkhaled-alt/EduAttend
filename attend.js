@@ -95,41 +95,54 @@ async function initPage() {
 // ==========================
 // Load Students for Lesson
 // ==========================
-loadStudentsBtn.addEventListener("click", async () => {
+loadStudentsBtn.onclick = async () => {
+  studentsList.innerHTML = "<p>جاري تحميل الطلاب...</p>";
 
-  studentsTbody.innerHTML = "";
-
-  const lessonId = lessonSelect.value;
-  if (!lessonId) return alert("اختر حصة أولاً");
-
-  const L = lessonsMap[lessonId];
-  if (!L) return alert("الحصة غير موجودة!");
-
-  currentLessonKey = L.lessonKey; // 🔵 المفتاح الأساسي
-
-  const q = query(collection(db, "students"), where("level", "==", L.level));
-  const snap = await getDocs(q);
-
-  if (snap.size === 0) {
-    studentsTbody.innerHTML = `<tr><td colspan="3">لا يوجد طلاب لهذا المستوى</td></tr>`;
-    return;
-  }
-
-  // ==========================
-  // Load OLD attendance for this lesson & date
-  // ==========================
-  const today = attendanceDate.value;
-  let oldAttendance = {};
-
-  const attendanceRoot = collection(db, "lessons", currentLessonKey, "attendance");
-  const oldSnap = await getDocs(attendanceRoot);
-
-  oldSnap.forEach(doc => {
-    const data = doc.data();
-    if (data.date === today) {
-      oldAttendance[doc.id] = data.present;
+  try {
+    const lessonSnap = await getDoc(doc(db, "lessons", lessonId));
+    if (!lessonSnap.exists()) {
+      studentsList.innerHTML = "<p>لم يتم العثور على بيانات الحصة.</p>";
+      return;
     }
-  });
+
+    const L = lessonSnap.data();
+
+    // 🔥 توحيد النوع (نحوّل الاثنين لنص)
+    const lessonLevel = String(L.level).trim();
+
+    const q = query(
+      collection(db, "students"),
+      where("level", "==", lessonLevel)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      studentsList.innerHTML = "<p>لا يوجد طلاب لهذا المستوى.</p>";
+      return;
+    }
+
+    studentsList.innerHTML = "";
+
+    querySnapshot.forEach((docu) => {
+      const stu = docu.data();
+
+      const div = document.createElement("div");
+      div.classList.add("student-item");
+
+      div.innerHTML = `
+        <span>${stu.name}</span>
+        <input type="checkbox" data-id="${docu.id}" />
+      `;
+
+      studentsList.appendChild(div);
+    });
+  } catch (error) {
+    studentsList.innerHTML = "<p>حدث خطأ أثناء تحميل الطلاب.</p>";
+    console.error(error);
+  }
+};
+
 
   // ==========================
   // Build Students Table
