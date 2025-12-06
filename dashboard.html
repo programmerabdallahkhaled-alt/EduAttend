@@ -98,15 +98,110 @@
     </div>
 
     <!-- Content -->
+<style>
+/* ========== Responsive & Modern Styling ========== */
+
+/* Filter Buttons */
+.filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tabBtn {
+    padding: 10px 18px;
+    border-radius: 30px;
+    background: #eef4ff;
+    color: #2a4ea3;
+    border: 1px solid #d2e2ff;
+    cursor: pointer;
+    font-size: 15px;
+    transition: .25s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.tabBtn:hover {
+    background: #dbe8ff;
+    transform: translateY(-2px);
+}
+
+.tabBtn.active {
+    background: linear-gradient(135deg, #538bff, #2a4ea3);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Form Inputs */
+.student-input {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cdd9f5;
+    font-size: 15px;
+    width: 100%;
+}
+
+/* Student Table */
+#studentsTable th, #studentsTable td {
+    font-size: 15px;
+    border-bottom: 1px solid #eef2ff;
+}
+
+@media (max-width: 768px) {
+    #studentsTable thead {
+        display: none;
+    }
+
+    #studentsTable tr {
+        display: block;
+        margin-bottom: 15px;
+        background: #ffffff;
+        padding: 12px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    #studentsTable td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+    }
+
+    #studentsTable td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #2a4ea3;
+    }
+}
+
+/* Add Button */
+.add-btn {
+    background: linear-gradient(135deg, #2a4ea3, #538bff);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: .25s;
+}
+
+.add-btn:hover {
+    opacity: .9;
+}
+</style>
+
+
 <div id="students" class="page box" style="display:none;">
     <div class="title">إدارة الطلاب</div>
 
-    <!-- Tabs -->
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button class="tabBtn" onclick="filterLevel('all')">الكل</button>
-        <button class="tabBtn" onclick="filterLevel('first')">أولى ثانوي</button>
-        <button class="tabBtn" onclick="filterLevel('second')">ثاني ثانوي</button>
-        <button class="tabBtn" onclick="filterLevel('third')">ثالث ثانوي</button>
+    <!-- Filter Buttons -->
+    <div class="filter-container">
+        <button class="tabBtn active" onclick="filterLevel('all', this)">الكل</button>
+        <button class="tabBtn" onclick="filterLevel('first', this)">أولى ثانوي</button>
+        <button class="tabBtn" onclick="filterLevel('second', this)">ثاني ثانوي</button>
+        <button class="tabBtn" onclick="filterLevel('third', this)">ثالث ثانوي</button>
     </div>
 
     <!-- Add Student Form -->
@@ -114,34 +209,24 @@
         <h3 style="margin-bottom:15px; color:#2a4ea3;">إضافة طالب جديد</h3>
 
         <div style="display:flex; flex-direction:column; gap:15px;">
-
-            <input id="studentName" 
-                   placeholder="اسم الطالب" 
-                   style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
-
-            <input id="studentCode" 
-                   placeholder="كود الطالب (اختياري)" 
-                   style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
-
-            <select id="studentLevel" 
-                    style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
+            <input id="studentName" class="student-input" placeholder="اسم الطالب">
+            <input id="studentCode" class="student-input" placeholder="كود الطالب (اختياري)">
+            
+            <select id="studentLevel" class="student-input">
                 <option value="first">أولى ثانوي</option>
                 <option value="second">ثاني ثانوي</option>
                 <option value="third">ثالث ثانوي</option>
             </select>
 
-            <button onclick="addStudent()" 
-                style="background:#2a4ea3; color:white; padding:12px; border:none; border-radius:12px; cursor:pointer;">
-                إضافة طالب
-            </button>
+            <button class="add-btn" onclick="addStudent()">إضافة طالب</button>
         </div>
     </div>
 
-    <!-- Student List -->
+    <!-- Students List -->
     <div class="box">
         <h3 style="margin-bottom:15px; color:#2a4ea3;">قائمة الطلاب</h3>
-        <table id="studentsTable" 
-               style="width:100%; border-collapse:collapse; text-align:right;">
+
+        <table id="studentsTable" style="width:100%; border-collapse:collapse;">
             <thead>
                 <tr style="background:#e8f0ff;">
                     <th style="padding:12px;">الاسم</th>
@@ -155,80 +240,79 @@
     </div>
 </div>
 
+
 <script>
-    let students = []; // لاحقًا هنستبدلها بـ Firebase
+let students = [];
 
-    function addStudent(){
-        const name = document.getElementById("studentName").value.trim();
-        const code = document.getElementById("studentCode").value.trim();
-        const level = document.getElementById("studentLevel").value;
+function addStudent(){
+    const name = studentName.value.trim();
+    const code = studentCode.value.trim();
+    const level = studentLevel.value;
 
-        if(name === ""){
-            alert("من فضلك اكتب اسم الطالب");
-            return;
-        }
-
-        const student = {
-            id: Date.now(),
-            name,
-            code,
-            level
-        };
-
-        students.push(student);
-        displayStudents();
-        clearForm();
+    if(name === ""){
+        alert("من فضلك اكتب اسم الطالب");
+        return;
     }
 
-    function clearForm(){
-        document.getElementById("studentName").value = "";
-        document.getElementById("studentCode").value = "";
-        document.getElementById("studentLevel").value = "first";
-    }
+    const student = {
+        id: Date.now(),
+        name,
+        code,
+        level
+    };
 
-    function deleteStudent(id){
-        students = students.filter(s => s.id !== id);
-        displayStudents();
-    }
+    students.push(student);
+    displayStudents();
+    clearForm();
+}
 
-    function filterLevel(level){
-        document.querySelectorAll(".tabBtn")
-            .forEach(btn => btn.style.background = "#e9f1ff");
+function clearForm(){
+    studentName.value = "";
+    studentCode.value = "";
+    studentLevel.value = "first";
+}
 
-        event.target.style.background = "#dbe8ff";
+function deleteStudent(id){
+    students = students.filter(s => s.id !== id);
+    displayStudents();
+}
 
-        displayStudents(level);
-    }
+function filterLevel(level, btn){
+    // تغيير شكل الزر المختار
+    document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-    function displayStudents(level = "all"){
-        const tbody = document.getElementById("studentsList");
-        tbody.innerHTML = "";
+    displayStudents(level);
+}
 
-        students
-        .filter(s => level === "all" || s.level === level)
-        .forEach(s => {
-            const row = `
-                <tr>
-                    <td style="padding:12px;">${s.name}</td>
-                    <td style="padding:12px;">${s.code || "-"}</td>
-                    <td style="padding:12px;">${translateLevel(s.level)}</td>
-                    <td style="padding:12px;">
-                        <button onclick="deleteStudent(${s.id})"
-                                style="background:#ff4d4d; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">
-                            حذف
-                        </button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    }
+function displayStudents(level = "all"){
+    const tbody = document.getElementById("studentsList");
+    tbody.innerHTML = "";
 
-    function translateLevel(level){
-        if(level === "first") return "أولى ثانوي";
-        if(level === "second") return "ثاني ثانوي";
-        if(level === "third") return "ثالث ثانوي";
-    }
+    students
+    .filter(s => level === "all" || s.level === level)
+    .forEach(s => {
+        tbody.innerHTML += `
+            <tr>
+                <td data-label="الاسم">${s.name}</td>
+                <td data-label="الكود">${s.code || "-"}</td>
+                <td data-label="المرحلة">${translateLevel(s.level)}</td>
+                <td data-label="إجراءات">
+                    <button onclick="deleteStudent(${s.id})"
+                        style="background:#ff4d4d; color:white; border:none; padding:6px 10px; border-radius:8px; cursor:pointer;">
+                        حذف
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function translateLevel(level){
+    if(level === "first") return "أولى ثانوي";
+    if(level === "second") return "ثاني ثانوي";
+    if(level === "third") return "ثالث ثانوي";
+}
 </script>
 
 
