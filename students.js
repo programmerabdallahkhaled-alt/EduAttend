@@ -88,8 +88,21 @@ async function loadStudents(filterLevel = "all") {
 
 // ===== التصفية حسب المستوى =====
 document.getElementById("levelFilter").addEventListener("change", (e) => {
-  loadStudents(e.target.value);
+  const selected = e.target.value;
+
+  // تحويل قيم الفلتر إلى القيم المخزنة في Firestore
+  const levelMap = {
+    "اولى": "1",
+    "تانية": "2",
+    "تالتة": "3",
+    "all": "all"
+  };
+
+  const firebaseLevel = levelMap[selected] || "all";
+
+  loadStudents(firebaseLevel);
 });
+
 
 
 
