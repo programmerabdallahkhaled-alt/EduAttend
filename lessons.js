@@ -19,6 +19,12 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// ===== زر إضافة حصة =====
+document.getElementById("addLessonBtn").addEventListener("click", () => {
+  window.location.href = "addLesson.html";  
+});
+
+
 // -------------------------------
 // حماية الصفحة
 // -------------------------------
@@ -41,10 +47,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 
 });
 
-// ===== زر إضافة حصة =====
-document.getElementById("addLessonBtn").addEventListener("click", () => {
-  window.location.href = "addLesson.html";  
-});
 
 
 // -------------------------------
