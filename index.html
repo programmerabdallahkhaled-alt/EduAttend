@@ -9,82 +9,93 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #1A73F3, #0094F3);
-      font-family: sans-serif;
+      background: #f4f6f9;
+      font-family: "Segoe UI", sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .login-card {
-      width: 360px;
+    .login-container {
+      width: 380px;
       background: #ffffff;
-      padding: 30px;
-      border-radius: 18px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      padding: 40px 32px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
       text-align: center;
+      border: 1px solid #e7e7e7;
     }
 
-    h2 {
+    .title {
       margin-bottom: 25px;
-      color: #1A73F3;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1b1b1b;
     }
 
-    input {
+    .input-field {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       margin: 10px 0;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      outline: none;
+      border-radius: 14px;
+      border: 1px solid #d6d6d6;
       font-size: 15px;
+      background: #fafafa;
+      transition: 0.2s;
     }
 
-    input:focus {
-      border-color: #1A73F3;
+    .input-field:focus {
+      border-color: #1a73f3;
+      background: #fff;
+      box-shadow: 0 0 5px rgba(26,115,243,0.25);
+      outline: none;
     }
 
-    button {
+    .login-btn {
       width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #1A73F3, #0094F3);
+      padding: 14px;
+      margin-top: 15px;
+      background: #1a73f3;
+      background: linear-gradient(135deg, #1a73f3, #0094f3);
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       color: white;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      transition: 0.2s;
+    }
+
+    .login-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 118, 255, 0.25);
     }
 
     .error {
-      color: red;
+      margin-top: 12px;
       font-size: 14px;
-      margin-top: 10px;
+      color: #d60000;
     }
   </style>
 </head>
 
 <body>
+  <div class="login-container">
+    <div class="title">تسجيل الدخول</div>
 
-  <div class="login-card">
-    <h2>تسجيل الدخول</h2>
+    <input id="email" type="email" class="input-field" placeholder="البريد الإلكتروني" />
+    <input id="password" type="password" class="input-field" placeholder="كلمة المرور" />
 
-    <input id="email" type="email" placeholder="البريد الإلكتروني" />
-    <input id="password" type="password" placeholder="كلمة المرور" />
-
-    <button id="loginBtn">تسجيل دخول</button>
+    <button id="loginBtn" class="login-btn">تسجيل دخول</button>
 
     <div id="errorBox" class="error"></div>
   </div>
 
-
-  <!-- Firebase Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyADeo3Nc2lqGKtnr_UqfNEZB28aGUCQsrc",
       authDomain: "eduattend-90a3d.firebaseapp.com",
@@ -109,7 +120,7 @@
 
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          window.location.href = "dashboard.html"; // ← حوّل للوحة التحكم
+          window.location.href = "dashboard.html";
         })
         .catch((error) => {
           if (error.code === 'auth/invalid-credential') {
