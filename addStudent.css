@@ -1,59 +1,172 @@
-body {
-  margin: 0;
-  font-family: "Tajawal", sans-serif;
-  background: #f5f7fa;
+/* addStudent.css - نسخة متجاوبة ومحسّنة */
+/* قواعد عامة */
+* { box-sizing: border-box; }
+:root{
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --primary: #4e73df;
+  --primary-hover: #3b5cc8;
+  --danger: #e74a3b;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --radius: 12px;
+  --gap: 1rem;
+  --shadow: 0 6px 18px rgba(15,23,42,0.06);
+  --container-max: 920px;
+  --font-sans: "Tajawal", "Cairo", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* مركز الحاوية — متجاوبة */
 .container {
-  width: 380px;
-  margin: 90px auto;
-  padding: 25px;
-  background: #fff;
+  width: 100%;
+  max-width: 480px; /* عرض افتراضي للجوال الكبير */
+  margin: 4.5rem auto;
+  padding: 1.25rem;
+  background: var(--card-bg);
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
 }
 
-h2 {
+/* عناوين ونصوص */
+h2{
+  margin: 0 0 0.75rem 0;
   text-align: center;
-  margin-bottom: 25px;
-  color: #4e73df;
+  color: var(--primary);
+  font-size: 1.25rem;
+  line-height:1.2;
 }
 
-label {
-  display: block;
-  margin-top: 10px;
-  font-size: 15px;
+label{
+  display:block;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--muted);
 }
 
-input, select {
+/* الحقول */
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="date"],
+select,
+textarea {
   width: 100%;
-  margin-top: 6px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 15px;
+  margin-top: 0.35rem;
+  padding: 0.75rem;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
 }
 
-button {
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 6px 18px rgba(78,115,223,0.08);
+}
+
+/* أزرار */
+.btn {
+  display: inline-block;
   width: 100%;
-  margin-top: 18px;
-  padding: 12px;
+  margin-top: 1rem;
+  padding: 0.85rem;
   border: none;
-  border-radius: 8px;
-  background: #4e73df;
+  border-radius: 10px;
+  background: var(--primary);
   color: #fff;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background .15s ease, transform .06s ease;
 }
 
-button:hover {
-  background: #3b5cc8;
+.btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn.secondary { background: #f3f4f6; color: var(--text); }
+.btn.danger { background: var(--danger); }
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
 }
 
+/* لو في زرين جنب بعض (على الشاشات الكبيرة) */
+.actions .btn {
+  width: 100%;
+}
+
+/* تحسين المساحات الداخلية للهاتف */
+@media (min-width: 576px) {
+  .container { padding: 1.5rem; max-width: 560px; margin-top:5rem; }
+  h2 { font-size: 1.4rem; }
+}
+
+/* تخطيط على الشاشات الأعرض — نعرض الحقول وزرين جنب بعض */
+@media (min-width: 900px) {
+  .container {
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 1fr 320px; /* form + sidebar صغير */
+    gap: 1.25rem;
+    align-items: start;
+  }
+  /* لو الحاوية داخل grid، نعمل form بالعمود الأول */
+  .form-main { grid-column: 1 / 2; }
+  .form-side { grid-column: 2 / 3; }
+
+  /* أكشنز أفقية */
+  .actions { flex-direction: row; }
+}
+
+/* تصميم لزر الإلغاء / ثانوي */
 .cancel {
-  background: #e74a3b;
+  background: #ef4444; /* red-500 */
+  color: #fff;
+}
+.cancel:hover { background: #dc2626; }
+
+/* نصوص مساعدة */
+.helper {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: .45rem;
 }
 
-.cancel:hover {
-  background: #d62c1a;
+/* تحسين للراوتر rtl */
+html[dir="rtl"] .container {
+  /* لو حبيت فرق padding يمين/يسار خاص */
+}
+
+/* وصولية: حالة غير مفعّل */
+[disabled], .disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* تحسين الطباعة وملاءمة الشاشة */
+@media (max-width: 420px) {
+  .container { margin: 2rem 1rem; padding: 1rem; border-radius: 12px; }
+  h2 { font-size: 1.1rem; }
+  input, select { padding: 0.6rem; font-size: 0.92rem; }
+  .btn { padding: 0.7rem; font-size: 0.98rem; }
+}
+
+/* إضافة transition لطيف للعناصر التفاعلية */
+input, select, .btn {
+  transition: all 160ms cubic-bezier(.2,.8,.2,1);
 }
