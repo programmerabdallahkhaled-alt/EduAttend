@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAttend Dashboard</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: "Poppins", sans-serif;
+        }
+
+        body{
+            background: linear-gradient(135deg, #e8f0ff, #f6f9ff);
+            height:100vh;
+            display:flex;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar{
+            width:260px;
+            background:#f0f6ff;
+            border-right: 1px solid #d8e7ff;
+            border-radius: 0 20px 20px 0;
+            padding:25px;
+            display:flex;
+            flex-direction:column;
+            gap:30px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.05);
+        }
+
+        .brand{
+            font-size:24px;
+            font-weight:bold;
+            color:#2a4ea3;
+            text-align:center;
+        }
+
+        .menu{
+            display:flex;
+            flex-direction:column;
+            gap:15px;
+            margin-top:20px;
+        }
+
+        .menu button{
+            background:#e9f1ff;
+            border:none;
+            padding:14px 18px;
+            border-radius:14px;
+            text-align:right;
+            cursor:pointer;
+            font-size:16px;
+            color:#2a4ea3;
+            transition:0.3s;
+        }
+
+        .menu button:hover{
+            background:#dbe8ff;
+            transform:translateX(-5px);
+        }
+
+        /* ===== Content ===== */
+        .content{
+            flex:1;
+            padding:35px;
+        }
+
+        .title{
+            font-size:26px;
+            font-weight:bold;
+            color:#1f3b70;
+            margin-bottom:25px;
+        }
+
+        .box{
+            background:white;
+            padding:25px;
+            border-radius:20px;
+            box-shadow:0 5px 20px rgba(0,0,0,0.07);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">EduAttend</div>
+
+        <div class="menu">
+            <button onclick="showPage('students')">الطلاب</button>
+            <button onclick="showPage('lessons')">الحصص</button>
+            <button onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <div id="students" class="page box" style="display:none;">
+            <div class="title">قسم الطلاب</div>
+            <p>هنا سيظهر إدارة الطلاب: إضافة - حذف - تعديل</p>
+        </div>
+
+        <div id="lessons" class="page box" style="display:none;">
+            <div class="title">قسم الحصص</div>
+            <p>هنا سيظهر إدارة الحصص: إضافة - حذف - تعديل</p>
+        </div>
+
+        <div id="welcome" class="box">
+            <div class="title">مرحباً بك في لوحة التحكم 🎉</div>
+            <p>اختار من القائمة على اليسار.</p>
+        </div>
+    </div>
+
+<script>
+    function showPage(page){
+        document.querySelectorAll('.page').forEach(p => p.style.display = "none");
+        document.getElementById(page).style.display = "block";
+        document.getElementById("welcome").style.display = "none";
+    }
+
+    function logout(){
+        alert("سيتم إضافة تسجيل الخروج لاحقاً عبر Firebase Auth");
+    }
+</script>
+
+</body>
+</html>
