@@ -233,119 +233,93 @@ body{font-family:"Tajawal", "Poppins", sans-serif; background:linear-gradient(13
 }
 </style>
 
-<script>
-/* =================== Data (in-memory placeholders) ===================
-   لاحقاً ستحل محلها عمليات القراءة / الكتابة إلى Firebase
-   - students: مصفوفة طلاب {id,name,code,level}
-   - lessons: مصفوفة حصص {id,title,date,level,key}
-   - attendance: كائن مخزن به الحضور keyed by lesson.key -> [studentId,...]
-*/
-let students = [];
-let lessons = [];
-let attendance = {}; // { lessonKey: [ids] }
+<script type="module">
+import { 
+    collection, addDoc, deleteDoc, doc, getDocs 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ------------------ Utilities ------------------ */
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-const uid = () => Date.now() + Math.floor(Math.random()*900);
+/* ========== COLLECTION ========== */
+const studentsCol = collection(db, "students");
 
-/* ------------------ Sidebar & navigation ------------------ */
-function toggleSidebar(){ document.querySelector('.sidebar').classList.toggle('active'); }
-function showPage(id){
-  // hide pages
-  $$('.page').forEach(p => p.hidden = true);
-  // show target
-  const el = document.getElementById(id);
-  if(el) el.hidden = false;
-  // hide welcome when first navigating
-  $('#welcome').hidden = true;
-  // scroll top
-  window.scrollTo({top:0,behavior:'smooth'});
+/* ========== تحميل الطلاب ========== */
+async function loadStudents(filter = "all") {
+    const data = await getDocs(studentsCol);
+    const tbody = document.getElementById("studentsList");
+    tbody.innerHTML = "";
+
+    const list = [];
+    data.forEach(d => list.push({ id: d.id, ...d.data() }));
+
+    const filtered = filter === "all" 
+        ? list 
+        : list.filter(s => s.level === filter);
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr><td colspan="4" style="padding:15px;color:#555">لا يوجد طلاب</td></tr>
+        `;
+        return;
+    }
+
+    filtered.forEach(s => {
+        tbody.innerHTML += `
+            <tr>
+                <td data-label="الاسم">${s.name}</td>
+                <td data-label="الكود">${s.code || "-"}</td>
+                <td data-label="المرحلة">${translateLevel(s.level)}</td>
+                <td data-label="إجراءات">
+                    <button onclick="deleteStudent('${s.id}')" 
+                        style="background:#ff4d4d;color:white;padding:6px 10px;border:none;border-radius:8px;">
+                        حذف
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
 }
 
-/* connect sidebar buttons */
-$('#studentsBtn').addEventListener('click', ()=> showPage('students'));
-$('#lessonsBtn').addEventListener('click', ()=> showPage('lessons'));
-$('#logoutBtn').addEventListener('click', ()=> { alert('سيتم إضافة تسجيل الخروج عبر Firebase لاحقاً'); });
+/* ========== إضافة طالب ========== */
+window.addStudent = async function () {
+    const name = studentName.value.trim();
+    const code = studentCode.value.trim();
+    const level = studentLevel.value;
 
-/* ------------------ Students logic ------------------ */
-/* render students table according to filter (level) */
-function renderStudents(filter='all'){
-  const tbody = $('#studentsList');
-  tbody.innerHTML = '';
-  const list = students.filter(s => filter==='all' || s.level===filter);
-  if(list.length===0){
-    tbody.innerHTML = `<tr><td colspan="4" style="padding:18px;color:${'#6d6d6d'}">لا يوجد طلاب بعد</td></tr>`;
-    return;
-  }
-  for(const s of list){
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td data-label="الاسم">${escapeHtml(s.name)}</td>
-      <td data-label="الكود">${escapeHtml(s.code||'-')}</td>
-      <td data-label="المرحلة">${translateLevel(s.level)}</td>
-      <td data-label="إجراءات">
-        <button class="btn-ghost" onclick="openEditStudent(${s.id})">تعديل</button>
-        <button class="btn-ghost" style="margin-inline-start:8px;background:#ff4d4d;color:#fff;border:0" onclick="deleteStudent(${s.id})">حذف</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  }
+    if (!name) { alert("اكتب اسم الطالب"); return; }
+
+    await addDoc(studentsCol, { name, code, level });
+
+    studentName.value = "";
+    studentCode.value = "";
+    studentLevel.value = "first";
+
+    loadStudents();
+};
+
+/* ========== حذف طالب ========== */
+window.deleteStudent = async function (id) {
+    if (!confirm("مسح الطالب؟")) return;
+    await deleteDoc(doc(db, "students", id));
+    loadStudents();
+};
+
+/* ========== الفلاتر ========== */
+window.filterLevel = function (level, btn) {
+    document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadStudents(level);
+};
+
+/* ========== ترجمة المرحلة ========== */
+function translateLevel(l) {
+    return l === "first"
+        ? "أولى ثانوي"
+        : l === "second"
+        ? "ثاني ثانوي"
+        : "ثالث ثانوي";
 }
 
-/* add student */
-$('#addStudentBtn').addEventListener('click', ()=>{
-  const name = $('#studentName').value.trim();
-  const code = $('#studentCode').value.trim();
-  const level = $('#studentLevel').value;
-  if(!name){ alert('من فضلك اكتب اسم الطالب'); return; }
-  const s = { id: uid(), name, code, level };
-  students.push(s);
-  // reset
-  $('#studentName').value=''; $('#studentCode').value=''; $('#studentLevel').value='first';
-  renderStudents(currentFilter);
-});
-
-/* delete student */
-function deleteStudent(id){
-  if(!confirm('هل أنت متأكد من حذف الطالب؟')) return;
-  students = students.filter(s => s.id !== id);
-  // also remove from attendance records
-  for(const k in attendance){
-    attendance[k] = attendance[k].filter(x => x !== id);
-  }
-  renderStudents(currentFilter);
-  renderAttendanceIfOpen();
-}
-
-/* edit student (simple prompt flow) */
-function openEditStudent(id){
-  const s = students.find(x=>x.id===id);
-  if(!s) return;
-  const newName = prompt('تعديل اسم الطالب:', s.name);
-  if(newName===null) return;
-  s.name = newName.trim() || s.name;
-  renderStudents(currentFilter);
-  renderAttendanceIfOpen();
-}
-
-/* helpers */
-function translateLevel(l){
-  return l==='first' ? 'أولى ثانوي' : l==='second' ? 'ثاني ثانوي' : 'ثالث ثانوي';
-}
-function escapeHtml(str){ return String(str).replace(/[&<>"]/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
-
-/* ------------------ Filters (pills) ------------------ */
-let currentFilter = 'all';
-$$('.tabBtn').forEach(btn=>{
-  btn.addEventListener('click', (e)=>{
-    $$('.tabBtn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const level = btn.dataset.level;
-    currentFilter = level;
-    renderStudents(level);
-  });
-});
+/* تحميل أولي */
+loadStudents();
 
 /* ------------------ Lessons logic ------------------ */
 /* generate lesson key: lesson_ + 11 digits */
