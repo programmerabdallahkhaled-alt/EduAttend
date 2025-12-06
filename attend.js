@@ -20,6 +20,17 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+
+
+
+const test = await getDocs(collection(db, "lessons"));
+console.log("TEST LESSONS:", test.size);
+test.forEach(d => console.log("data:", d.data()));
+
+
+
+
+
 const lessonSelect = document.getElementById("lessonSelect");
 const loadStudentsBtn = document.getElementById("loadStudentsBtn");
 const attendanceDate = document.getElementById("attendanceDate");
