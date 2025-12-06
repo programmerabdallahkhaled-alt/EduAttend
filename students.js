@@ -87,20 +87,40 @@ async function loadStudents(filterLevel = "all") {
 
 
 // ===== التصفية حسب المستوى =====
-document.getElementById("levelFilter").addEventListener("change", (e) => {
-  const selected = e.target.value;
+document.getElementById("levelFilter").addEventListener("change", async (e) => {
+    const selected = e.target.value;
 
-  // تحويل قيم الفلتر إلى القيم المخزنة في Firestore
-  const levelMap = {
-    "اولى": "1",
-    "تانية": "2",
-    "تالتة": "3",
-    "all": "all"
-  };
+    // لو اختار عرض الكل
+    if (selected === "all") {
+        loadStudents("all");
+        return;
+    }
 
-  const firebaseLevel = levelMap[selected] || "all";
+    // نحمل الطلاب لمرة واحدة لاكتشاف مستوياتهم
+    const ref = collection(db, "students");
+    const snapshot = await getDocs(ref);
 
-  loadStudents(firebaseLevel);
+    let detectedLevel = null;
+
+    snapshot.forEach((docSnap) => {
+        const s = docSnap.data();
+
+        // لو الاسم المختار موجود في الاسم المكتوب داخل السجل
+        // مثال: "أولى" داخل "أولى ثانوي"
+        if (s.level.includes(selected) || selected.includes(s.level)) {
+            detectedLevel = s.level;
+        }
+    });
+
+    // لو ملقيناش مستوى مطابق → مفيش مشكلة → نعرض الكل
+    if (!detectedLevel) {
+        console.warn("لم يتم اكتشاف مستوى مطابق – سيتم عرض الكل");
+        loadStudents("all");
+        return;
+    }
+
+    // نحمل الطلاب بالرقم الحقيقي اللي في Firestore
+    loadStudents(detectedLevel);
 });
 
 
