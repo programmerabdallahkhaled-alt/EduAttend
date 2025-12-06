@@ -98,11 +98,139 @@
     </div>
 
     <!-- Content -->
-    <div class="content">
-        <div id="students" class="page box" style="display:none;">
-            <div class="title">قسم الطلاب</div>
-            <p>هنا سيظهر إدارة الطلاب: إضافة - حذف - تعديل</p>
+<div id="students" class="page box" style="display:none;">
+    <div class="title">إدارة الطلاب</div>
+
+    <!-- Tabs -->
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button class="tabBtn" onclick="filterLevel('all')">الكل</button>
+        <button class="tabBtn" onclick="filterLevel('first')">أولى ثانوي</button>
+        <button class="tabBtn" onclick="filterLevel('second')">ثاني ثانوي</button>
+        <button class="tabBtn" onclick="filterLevel('third')">ثالث ثانوي</button>
+    </div>
+
+    <!-- Add Student Form -->
+    <div class="box" style="margin-bottom:25px;">
+        <h3 style="margin-bottom:15px; color:#2a4ea3;">إضافة طالب جديد</h3>
+
+        <div style="display:flex; flex-direction:column; gap:15px;">
+
+            <input id="studentName" 
+                   placeholder="اسم الطالب" 
+                   style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
+
+            <input id="studentCode" 
+                   placeholder="كود الطالب (اختياري)" 
+                   style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
+
+            <select id="studentLevel" 
+                    style="padding:12px; border-radius:10px; border:1px solid #cdd9f5;">
+                <option value="first">أولى ثانوي</option>
+                <option value="second">ثاني ثانوي</option>
+                <option value="third">ثالث ثانوي</option>
+            </select>
+
+            <button onclick="addStudent()" 
+                style="background:#2a4ea3; color:white; padding:12px; border:none; border-radius:12px; cursor:pointer;">
+                إضافة طالب
+            </button>
         </div>
+    </div>
+
+    <!-- Student List -->
+    <div class="box">
+        <h3 style="margin-bottom:15px; color:#2a4ea3;">قائمة الطلاب</h3>
+        <table id="studentsTable" 
+               style="width:100%; border-collapse:collapse; text-align:right;">
+            <thead>
+                <tr style="background:#e8f0ff;">
+                    <th style="padding:12px;">الاسم</th>
+                    <th style="padding:12px;">الكود</th>
+                    <th style="padding:12px;">المرحلة</th>
+                    <th style="padding:12px;">إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="studentsList"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let students = []; // لاحقًا هنستبدلها بـ Firebase
+
+    function addStudent(){
+        const name = document.getElementById("studentName").value.trim();
+        const code = document.getElementById("studentCode").value.trim();
+        const level = document.getElementById("studentLevel").value;
+
+        if(name === ""){
+            alert("من فضلك اكتب اسم الطالب");
+            return;
+        }
+
+        const student = {
+            id: Date.now(),
+            name,
+            code,
+            level
+        };
+
+        students.push(student);
+        displayStudents();
+        clearForm();
+    }
+
+    function clearForm(){
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentCode").value = "";
+        document.getElementById("studentLevel").value = "first";
+    }
+
+    function deleteStudent(id){
+        students = students.filter(s => s.id !== id);
+        displayStudents();
+    }
+
+    function filterLevel(level){
+        document.querySelectorAll(".tabBtn")
+            .forEach(btn => btn.style.background = "#e9f1ff");
+
+        event.target.style.background = "#dbe8ff";
+
+        displayStudents(level);
+    }
+
+    function displayStudents(level = "all"){
+        const tbody = document.getElementById("studentsList");
+        tbody.innerHTML = "";
+
+        students
+        .filter(s => level === "all" || s.level === level)
+        .forEach(s => {
+            const row = `
+                <tr>
+                    <td style="padding:12px;">${s.name}</td>
+                    <td style="padding:12px;">${s.code || "-"}</td>
+                    <td style="padding:12px;">${translateLevel(s.level)}</td>
+                    <td style="padding:12px;">
+                        <button onclick="deleteStudent(${s.id})"
+                                style="background:#ff4d4d; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">
+                            حذف
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function translateLevel(level){
+        if(level === "first") return "أولى ثانوي";
+        if(level === "second") return "ثاني ثانوي";
+        if(level === "third") return "ثالث ثانوي";
+    }
+</script>
+
 
         <div id="lessons" class="page box" style="display:none;">
             <div class="title">قسم الحصص</div>
