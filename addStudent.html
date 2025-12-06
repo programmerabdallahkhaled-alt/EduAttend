@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إضافة طالب</title>
+  <link rel="stylesheet" href="addStudent.css" />
+</head>
+<body>
+
+  <div class="container">
+    <h2>إضافة طالب جديد</h2>
+
+    <form id="addStudentForm">
+
+      <label>اسم الطالب:</label>
+      <input type="text" id="studentName" required />
+
+      <label>رقم الهاتف:</label>
+      <input type="text" id="studentPhone" required />
+
+      <label>المستوى:</label>
+      <select id="studentLevel" required>
+        <option value="">اختر المستوى</option>
+        <option value="1">أولى ثانوي</option>
+        <option value="2">ثانية ثانوي</option>
+        <option value="3">ثالثة ثانوي</option>
+      </select>
+
+      <button type="submit">إضافة</button>
+      <button type="button" id="cancelBtn" class="cancel">إلغاء</button>
+
+    </form>
+  </div>
+
+  <script type="module" src="addStudent.js"></script>
+</body>
+</html>
