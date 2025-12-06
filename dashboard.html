@@ -222,6 +222,8 @@ body {
 </head>
 
 <body>
+    <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -475,6 +477,12 @@ function translateLevel(level){
         alert("سيتم إضافة تسجيل الخروج لاحقاً عبر Firebase Auth");
     }
 </script>
+    <script>
+function toggleSidebar(){
+    document.querySelector(".sidebar").classList.toggle("active");
+}
+</script>
+
 
 </body>
 </html>
