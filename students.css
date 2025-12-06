@@ -1,25 +1,38 @@
-/* === إعدادات أساسية === */
+/* ================================
+   إعدادات عامة
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
 body {
   margin: 0;
-  font-family: "Tajawal", sans-serif;
-  background: #f7f7f7;
+  font-family: "Cairo", sans-serif;
+  background: #f7f9fc;
   direction: rtl;
+  color: #333;
+  display: flex;
+  min-height: 100vh;
 }
 
-/* === الشريط الجانبي === */
+/* ================================
+   الشريط الجانبي
+================================ */
 .sidebar {
-  width: 230px;
+  width: 240px;
   background: #fff;
   height: 100vh;
   position: fixed;
   padding: 20px;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.08);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #3fa9f5;
+  transition: 0.3s;
 }
 
 .logo {
   margin-bottom: 25px;
   text-align: center;
-  color: #333;
+  font-size: 22px;
+  font-weight: bold;
+  color: #3fa9f5;
 }
 
 .sidebar ul {
@@ -32,117 +45,166 @@ body {
   padding: 12px 15px;
   margin-bottom: 10px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: 0.3s;
+  font-size: 17px;
+  background: #f5f8ff;
 }
 
 .sidebar ul li:hover {
-  background: #eee;
+  background: #e9f4ff;
 }
 
 .sidebar ul .active {
-  background: #4e73df;
+  background: #3fa9f5;
   color: #fff;
 }
 
 .logout {
-  margin-top: 30px;
+  margin-top: 25px;
   width: 100%;
   padding: 10px;
-  background: #d9534f;
+  background: #ff6d6d;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: 0.3s;
 }
 
 .logout:hover {
-  background: #c9302c;
+  background: #e85757;
 }
 
-/* === المحتوى === */
+/* =========== إخفاء السايدبار في الموبايل =========== */
+@media (max-width: 768px) {
+  .sidebar {
+    left: -260px;
+    z-index: 999;
+  }
+  .sidebar.show {
+    left: 0;
+  }
+}
+
+/* ================================
+   المحتوى
+================================ */
 .content {
-  margin-right: 250px;
+  margin-right: 260px;
   padding: 25px;
+  flex: 1;
+  transition: 0.3s;
 }
 
+@media (max-width: 768px) {
+  .content {
+    margin-right: 0;
+  }
+}
+
+/* ================================
+   الهيدر
+================================ */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 header h1 {
   margin: 0;
   font-size: 26px;
+  color: #333;
 }
 
 header button {
-  background: #1cc88a;
+  background: #3fa9f5;
   color: white;
   padding: 10px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 15px;
+  transition: 0.3s;
 }
 
 header button:hover {
-  background: #17a673;
+  background: #1e90ff;
 }
 
-/* === جدول الطلاب === */
+/* ================================
+   جدول الطلاب
+================================ */
 table {
   width: 100%;
   margin-top: 25px;
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   border-collapse: collapse;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 thead {
-  background: #4e73df;
+  background: #3fa9f5;
   color: white;
 }
 
 th, td {
-  padding: 12px;
+  padding: 14px;
   text-align: center;
   border-bottom: 1px solid #eee;
+  font-size: 15px;
 }
 
 tr:hover td {
-  background: #fafafa;
+  background: #f8fbff;
 }
 
+/* أزرار الأكشن داخل الجدول */
 td button {
   padding: 6px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
 td button:hover {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 td .del {
-  background: #e74a3b;
-  color: white;
+  background: #ff6d6d;
+  color: #fff;
 }
 
 td button:not(.del) {
-  background: #36b9cc;
+  background: #3fa9f5;
   color: white;
 }
 
-/* === الفلتر === */
+/* ===== جعل الجدول قابل للتمرير أفقيًا في الموبايل ===== */
+@media (max-width: 600px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* ================================
+   الفلتر
+================================ */
 select {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #cfd7e6;
   margin-top: 10px;
   background: white;
+  font-size: 15px;
 }
