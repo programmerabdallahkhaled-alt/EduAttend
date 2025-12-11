@@ -9,7 +9,9 @@ import {
 import { 
   getFirestore, 
   collection, 
-  getDocs, 
+  getDocs,
+  getDoc,
+  updateDoc,
   deleteDoc,
   doc,
   query,
@@ -29,29 +31,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-
-
-// ===== التأكد من تسجيل الدخول =====
+// ===== تأكيد تسجيل الدخول =====
 onAuthStateChanged(auth, (user) => {
   if (!user) window.location.href = "index.html";
   else loadStudents();
 });
-
-
 
 // ===== زر تسجيل الخروج =====
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
 });
 
-
-
 // ===== زر إضافة طالب =====
 document.getElementById("addStudentBtn").addEventListener("click", () => {
   window.location.href = "addStudent.html";
 });
-
-
 
 // ===== تحميل الطلاب =====
 async function loadStudents(filterLevel = "all") {
@@ -76,7 +70,7 @@ async function loadStudents(filterLevel = "all") {
         <td>${student.name}</td>
         <td>${student.level}</td>
         <td>
-          <button onclick="editStudent('${docSnap.id}')">تعديل</button>
+          <button onclick="openEditModal('${docSnap.id}')">تعديل</button>
           <button class="del" onclick="deleteStudent('${docSnap.id}')">حذف</button>
         </td>
       </tr>
@@ -84,35 +78,24 @@ async function loadStudents(filterLevel = "all") {
   });
 }
 
-
-
 // ===== التصفية حسب المستوى =====
 document.getElementById("levelFilter").addEventListener("change", (e) => {
-    const selected = e.target.value;
+  const selected = e.target.value;
 
-    // لو اختار "عرض الكل"
-    if (selected === "all") {
-        loadStudents("all");
-        return;
-    }
+  if (selected === "all") {
+    loadStudents("all");
+    return;
+  }
 
-    // نحول القيمة إلى رقم لأن Firestore مخزنها Number وليس String
-    const levelNumber = Number(selected);
+  const levelNumber = Number(selected);
 
-    // لو التحويل معرفش يجيب رقم → اعرض الكل
-    if (isNaN(levelNumber)) {
-        console.warn("قيمة المستوى غير صالحة – سيتم عرض الكل");
-        loadStudents("all");
-        return;
-    }
+  if (isNaN(levelNumber)) {
+    loadStudents("all");
+    return;
+  }
 
-    // تحميل الطلاب حسب المستوى الرقمي
-    loadStudents(levelNumber);
+  loadStudents(levelNumber);
 });
-
-
-
-
 
 // ===== حذف طالب =====
 window.deleteStudent = async function (id) {
@@ -122,9 +105,54 @@ window.deleteStudent = async function (id) {
   loadStudents();
 };
 
+// ======================================================
+// ========   نظام التعديل عبر نافذة منبثقة   ===========
+// ======================================================
 
+// عناصر المودال
+const modal = document.getElementById("editModal");
+const closeBtn = document.getElementById("closeModal");
 
-// ===== تعديل طالب =====
-window.editStudent = function (id) {
-  window.location.href = `editStudent.html?id=${id}`;
+const nameInput = document.getElementById("editName");
+const levelInput = document.getElementById("editLevel");
+const saveBtn = document.getElementById("saveEditBtn");
+
+let currentStudentId = null;
+
+// فتح المودال وتحميل بيانات الطالب
+window.openEditModal = async function (id) {
+  currentStudentId = id;
+
+  const ref = doc(db, "students", id);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    alert("خطأ: الطالب غير موجود!");
+    return;
+  }
+
+  const st = snap.data();
+
+  nameInput.value = st.name;
+  levelInput.value = st.level;
+
+  modal.style.display = "flex";
 };
+
+// إغلاق المودال
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// حفظ التعديلات
+saveBtn.addEventListener("click", async () => {
+  if (!currentStudentId) return;
+
+  await updateDoc(doc(db, "students", currentStudentId), {
+    name: nameInput.value,
+    level: Number(levelInput.value)
+  });
+
+  modal.style.display = "none";
+  loadStudents();
+});
