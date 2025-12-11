@@ -1,4 +1,4 @@
-// attend.js - النسخة الكاملة بعد إضافة حالة الدفع
+// attend.js - النسخة النهائية
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -8,8 +8,7 @@ import {
   query,
   where,
   doc,
-  setDoc,
-  getDoc
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   getAuth,
@@ -17,7 +16,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ======= config ======= */
+/* ======= Firebase config ======= */
 const firebaseConfig = {
   apiKey: "AIzaSyADeo3Nc2lqGKtnr_UqfNEZB28aGUCQsrc",
   authDomain: "eduattend-90a3d.firebaseapp.com",
@@ -42,9 +41,8 @@ const logoutBtn = document.getElementById("logoutBtn");
 
 /* ======= State ======= */
 let lessonsMap = {};
-let currentUser = null;
 let currentLessonId = null;
-let currentLessonKey = null;
+let currentUser = null;
 
 /* ======= Auth ======= */
 onAuthStateChanged(auth, user => {
@@ -56,56 +54,42 @@ onAuthStateChanged(auth, user => {
   initPage();
 });
 
-/* logout */
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      window.location.href = "login.html";
-    } catch (err) {
-      alert("حدث خطأ أثناء تسجيل الخروج");
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+});
+
+/* ======= Fix: universal filter ======= */
+async function fetchStudentsByLevelUniversal(level) {
+  const allSnap = await getDocs(collection(db, "students"));
+  const clean = v => String(v).trim();
+  const target = clean(level);
+
+  const result = [];
+  allSnap.forEach(d => {
+    const s = d.data();
+    if (s.level === undefined) return;
+
+    if (clean(s.level) === target) {
+      result.push(d);
     }
   });
+
+  return result;
 }
 
-/* ======= fetch students by level ======= */
-async function fetchStudentsByLevelSafe(levelString) {
-  const resultsMap = new Map();
-
-  // string
-  try {
-    const q1 = query(collection(db, "students"), where("level", "==", levelString));
-    const snap1 = await getDocs(q1);
-    snap1.forEach(d => resultsMap.set(d.id, d));
-  } catch {}
-
-  // number
-  try {
-    const num = Number(levelString);
-    if (!Number.isNaN(num)) {
-      const q2 = query(collection(db, "students"), where("level", "==", num));
-      const snap2 = await getDocs(q2);
-      snap2.forEach(d => resultsMap.set(d.id, d));
-    }
-  } catch {}
-
-  return Array.from(resultsMap.values());
-}
-
-/* ======= Init ======= */
+/* ======= Load lessons ======= */
 async function initPage() {
-  const lessonsSnap = await getDocs(collection(db, "lessons"));
-
   lessonSelect.innerHTML = `<option value="">-- اختر حصة --</option>`;
 
+  const lessonsSnap = await getDocs(collection(db, "lessons"));
   lessonsSnap.forEach(d => {
     const data = d.data();
     lessonsMap[d.id] = {
-      lessonId: d.id,
-      lessonKey: data.key || d.id,
-      level: String(data.level || "").trim(),
-      title: data.title || "حصة بدون عنوان",
-      date: data.date || ""
+      level: String(data.level).trim(),
+      title: data.title,
+      date: data.date,
+      key: data.key
     };
 
     const opt = document.createElement("option");
@@ -114,125 +98,116 @@ async function initPage() {
     lessonSelect.appendChild(opt);
   });
 
-  attendanceDate.value = new Date().toISOString().slice(0,10);
+  attendanceDate.value = new Date().toISOString().slice(0, 10);
 }
 
 /* ======= Load students ======= */
-if (loadStudentsBtn) {
-  loadStudentsBtn.addEventListener("click", async () => {
-    studentsTbody.innerHTML = "";
+loadStudentsBtn.addEventListener("click", async () => {
+  studentsTbody.innerHTML = "";
+  const lessonId = lessonSelect.value;
 
-    const lessonId = lessonSelect.value;
-    if (!lessonId) return alert("اختر حصة أولاً");
+  if (!lessonId) {
+    alert("اختر حصة أولاً");
+    return;
+  }
 
-    const L = lessonsMap[lessonId];
-    currentLessonId = lessonId;
-    currentLessonKey = L.lessonKey;
+  currentLessonId = lessonId;
+  const lessonInfo = lessonsMap[lessonId];
 
-    const studentsDocs = await fetchStudentsByLevelSafe(L.level);
-    if (!studentsDocs.length) {
-      studentsTbody.innerHTML = `<tr><td colspan="4">لا يوجد طلاب</td></tr>`;
-      return;
-    }
+  const studentDocs = await fetchStudentsByLevelUniversal(lessonInfo.level);
 
-    // load attendance
-    const attendanceCol = collection(db, "lessons", currentLessonId, "attendance");
-    const attendanceSnap = await getDocs(attendanceCol);
-    const attendanceMap = {};
-    const today = attendanceDate.value;
+  if (studentDocs.length === 0) {
+    studentsTbody.innerHTML = `<tr><td colspan="4">لا يوجد طلاب لهذا المستوى</td></tr>`;
+    return;
+  }
 
-    attendanceSnap.forEach(ad => {
-      const d = ad.data();
-      if (!d.date || d.date === today) {
-        attendanceMap[ad.id] = {
-          present: !!d.present,
-          paid: d.paid === undefined ? true : !!d.paid
-        };
-      }
-    });
+  const attendanceCol = collection(db, "lessons", lessonId, "attendance");
+  const attendanceSnap = await getDocs(attendanceCol);
 
-    // build rows
-    studentsDocs.forEach(s => {
-      const data = s.data();
-      const sid = s.id;
-
-      const presentChecked = attendanceMap[sid]?.present ? "checked" : "";
-      const paidChecked = attendanceMap[sid]?.paid !== false ? "checked" : "";
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${escapeHtml(data.name || "-")}</td>
-        <td>${escapeHtml(data.level || "-")}</td>
-
-        <td>
-          <label class="switch">
-            <input type="checkbox" data-type="present" data-student-id="${sid}" ${presentChecked}/>
-            <span class="slider"></span>
-          </label>
-        </td>
-
-        <td>
-          <label class="switch">
-            <input type="checkbox" data-type="paid" data-student-id="${sid}" ${paidChecked}/>
-            <span class="slider"></span>
-          </label>
-        </td>
-      `;
-
-      studentsTbody.appendChild(tr);
-    });
+  const attendanceMap = {};
+  attendanceSnap.forEach(ad => {
+    attendanceMap[ad.id] = ad.data();
   });
-}
+
+  studentDocs.forEach(snap => {
+    const s = snap.data();
+    const sid = snap.id;
+
+    const old = attendanceMap[sid] || {};
+
+    const presentChecked = old.present ? "checked" : "";
+    const paidChecked = (old.paid !== false) ? "checked" : "";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.name}</td>
+      <td>${s.level}</td>
+
+      <td>
+        <label class="switch">
+          <input type="checkbox" class="presentBox" data-sid="${sid}" ${presentChecked}>
+          <span class="slider"></span>
+        </label>
+      </td>
+
+      <td>
+        <label class="switch">
+          <input type="checkbox" class="paidBox" data-sid="${sid}" ${paidChecked}>
+          <span class="slider"></span>
+        </label>
+      </td>
+    `;
+
+    studentsTbody.appendChild(tr);
+  });
+});
 
 /* ======= Clear ======= */
-if (clearAttendanceBtn) {
-  clearAttendanceBtn.addEventListener("click", () => {
-    const checks = studentsTbody.querySelectorAll("input[type='checkbox']");
-    checks.forEach(c => c.checked = false);
+clearAttendanceBtn.addEventListener("click", () => {
+  const checks = studentsTbody.querySelectorAll("input[type='checkbox']");
+  checks.forEach(c => c.checked = false);
+});
+
+/* ======= Save Attendance ======= */
+saveAttendanceBtn.addEventListener("click", async () => {
+  if (!currentLessonId) {
+    alert("قم بتحميل طلاب الحصة أولاً");
+    return;
+  }
+
+  const dateStr = attendanceDate.value;
+
+  const presentBoxes = document.querySelectorAll(".presentBox");
+  const paidBoxes = document.querySelectorAll(".paidBox");
+
+  const promises = [];
+
+  presentBoxes.forEach((box, i) => {
+    const sid = box.dataset.sid;
+
+    const present = box.checked;
+    const paid = paidBoxes[i].checked;
+
+    const ref = doc(db, "lessons", currentLessonId, "attendance", sid);
+
+    promises.push(setDoc(ref, {
+      present,
+      paid,
+      date: dateStr,
+      updatedAt: new Date().toISOString(),
+      teacherUid: currentUser.uid
+    }, { merge: true }));
   });
-}
 
-/* ======= Save attendance ======= */
-if (saveAttendanceBtn) {
-  saveAttendanceBtn.addEventListener("click", async () => {
-    if (!currentLessonId) return alert("قم بتحميل طلاب الحصة أولاً");
+  await Promise.all(promises);
+  alert("تم حفظ الحضور بنجاح");
+});
 
-    const dateStr = attendanceDate.value;
-    const checks = studentsTbody.querySelectorAll("input[data-type='present']");
-    if (!checks.length) return alert("لا يوجد طلاب");
-
-    const promises = [];
-
-    checks.forEach(presentBox => {
-      const studentId = presentBox.dataset.studentId;
-
-      const paidBox = document.querySelector(`input[data-student-id="${studentId}"][data-type="paid"]`);
-      const present = !!presentBox.checked;
-      const paid = !!paidBox.checked;
-
-      const ref = doc(db, "lessons", currentLessonId, "attendance", studentId);
-
-      const payload = {
-        present,
-        paid,
-        date: dateStr,
-        teacherUid: currentUser.uid,
-        updatedAt: new Date().toISOString()
-      };
-
-      promises.push(setDoc(ref, payload, { merge: true }));
-    });
-
-    await Promise.all(promises);
-    alert("تم حفظ الحضور بنجاح ✔️");
-  });
-}
-
-/* escape HTML */
+/* ======= Safe HTML ======= */
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
