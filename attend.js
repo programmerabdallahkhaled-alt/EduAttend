@@ -1,4 +1,5 @@
-// attend.js - مصحح ونهائي (module)
+// attend.js - النسخة الكاملة بعد إضافة حالة الدفع
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getFirestore,
@@ -39,22 +40,15 @@ const saveAttendanceBtn = document.getElementById("saveAttendance");
 const clearAttendanceBtn = document.getElementById("clearAttendance");
 const logoutBtn = document.getElementById("logoutBtn");
 
-/* تحقق من أن العناصر موجودة */
-if (!lessonSelect || !loadStudentsBtn || !attendanceDate || !studentsTbody || !saveAttendanceBtn || !clearAttendanceBtn) {
-  console.error("عنصر/عناصر DOM غير موجودة — تأكد من ال IDs: lessonSelect, loadStudentsBtn, attendanceDate, studentsTbody, saveAttendance, clearAttendance");
-  // لا نكمل تنفيذ باقي الكود لأن الصفحة ناقصة عناصر
-}
-
 /* ======= State ======= */
-let lessonsMap = {}; // lessonId -> { key, level, title, date }
+let lessonsMap = {};
 let currentUser = null;
-let currentLessonId = null; // Firestore doc id for lesson
-let currentLessonKey = null; // the 'key' field inside lesson doc
+let currentLessonId = null;
+let currentLessonKey = null;
 
 /* ======= Auth ======= */
 onAuthStateChanged(auth, user => {
   if (!user) {
-    console.log("No user — redirecting to login");
     window.location.href = "login.html";
     return;
   }
@@ -69,32 +63,23 @@ if (logoutBtn) {
       await signOut(auth);
       window.location.href = "login.html";
     } catch (err) {
-      console.error("Logout error:", err);
       alert("حدث خطأ أثناء تسجيل الخروج");
     }
   });
 }
 
-/* ======= Helpers ======= */
-
-/**
- * fetchStudentsByLevelSafe(levelString)
- * يحاول جلب الطلاب أولًا بالمطابقة كسلسلة نصية ثم كرقم إن لم تجد نتائج،
- * ويعيد مصفوفة من سجلات المستندات (DocumentSnapshot) بدون تكرار.
- */
+/* ======= fetch students by level ======= */
 async function fetchStudentsByLevelSafe(levelString) {
   const resultsMap = new Map();
 
-  // Attempt 1: as string
+  // string
   try {
     const q1 = query(collection(db, "students"), where("level", "==", levelString));
     const snap1 = await getDocs(q1);
     snap1.forEach(d => resultsMap.set(d.id, d));
-  } catch (e) {
-    console.warn("error querying students by string level:", e);
-  }
+  } catch {}
 
-  // If none found, try as number (or always also try numeric to catch mixed types)
+  // number
   try {
     const num = Number(levelString);
     if (!Number.isNaN(num)) {
@@ -102,127 +87,107 @@ async function fetchStudentsByLevelSafe(levelString) {
       const snap2 = await getDocs(q2);
       snap2.forEach(d => resultsMap.set(d.id, d));
     }
-  } catch (e) {
-    console.warn("error querying students by numeric level:", e);
-  }
+  } catch {}
 
-  // return array of DocumentSnapshot
   return Array.from(resultsMap.values());
 }
 
-/* ======= Init: load lessons list ======= */
+/* ======= Init ======= */
 async function initPage() {
-  try {
-    if (!lessonSelect) return;
-    lessonSelect.innerHTML = `<option value="">-- اختر حصة --</option>`;
+  const lessonsSnap = await getDocs(collection(db, "lessons"));
 
-    const lessonsSnap = await getDocs(collection(db, "lessons"));
-    console.log("lessons snapshot size:", lessonsSnap.size);
+  lessonSelect.innerHTML = `<option value="">-- اختر حصة --</option>`;
 
-    lessonsSnap.forEach(d => {
-      const data = d.data() || {};
-      const key = (data.key !== undefined && data.key !== null && data.key !== "") ? String(data.key) : d.id;
-      const level = (data.level !== undefined && data.level !== null) ? String(data.level).trim() : "";
-      const title = data.title ? String(data.title) : "حصة بدون عنوان";
+  lessonsSnap.forEach(d => {
+    const data = d.data();
+    lessonsMap[d.id] = {
+      lessonId: d.id,
+      lessonKey: data.key || d.id,
+      level: String(data.level || "").trim(),
+      title: data.title || "حصة بدون عنوان",
+      date: data.date || ""
+    };
 
-      lessonsMap[d.id] = { lessonId: d.id, lessonKey: key, level, title, date: data.date || "" };
+    const opt = document.createElement("option");
+    opt.value = d.id;
+    opt.textContent = `${data.title} — مستوى ${data.level}`;
+    lessonSelect.appendChild(opt);
+  });
 
-      const opt = document.createElement("option");
-      opt.value = d.id; // store Firestore doc id
-      opt.textContent = `${title} — مستوى ${level || "-"}`;
-      lessonSelect.appendChild(opt);
-    });
-
-    // default date today
-    if (attendanceDate) attendanceDate.value = new Date().toISOString().slice(0,10);
-
-    if (lessonsSnap.size === 0) {
-      console.warn("لا توجد حِصص في مجموعة `lessons` (Firestore) — تأكد من وجود مستندات");
-    }
-
-  } catch (err) {
-    console.error("Error loading lessons:", err);
-    alert("حدث خطأ أثناء تحميل الحصص. افتح Console للمزيد.");
-  }
+  attendanceDate.value = new Date().toISOString().slice(0,10);
 }
 
-/* ======= Load students on button click ======= */
+/* ======= Load students ======= */
 if (loadStudentsBtn) {
   loadStudentsBtn.addEventListener("click", async () => {
-    if (!studentsTbody) return;
-    studentsTbody.innerHTML = ""; // clear
-    const lessonId = lessonSelect?.value;
-    if (!lessonId) {
-      alert("اختر حصة أولاً");
-      return;
-    }
+    studentsTbody.innerHTML = "";
+
+    const lessonId = lessonSelect.value;
+    if (!lessonId) return alert("اختر حصة أولاً");
 
     const L = lessonsMap[lessonId];
-    if (!L) {
-      alert("بيانات الحصة غير متاحة (راجع Firestore أو console).");
-      return;
-    }
-
     currentLessonId = lessonId;
     currentLessonKey = L.lessonKey;
 
-    try {
-      // unify level as string for searching
-      const lessonLevelStr = String(L.level).trim();
-
-      // fetch students safely (string or number)
-      const studentDocs = await fetchStudentsByLevelSafe(lessonLevelStr);
-
-      if (!studentDocs || studentDocs.length === 0) {
-        studentsTbody.innerHTML = `<tr><td colspan="3">لا يوجد طلاب لهذا المستوى</td></tr>`;
-        return;
-      }
-
-      // load attendance subcollection for this lesson (all docs)
-      const attendanceCol = collection(db, "lessons", currentLessonId, "attendance");
-      const attendanceSnap = await getDocs(attendanceCol);
-      const attendanceMap = {}; // studentId -> present for the selected date
-      const today = attendanceDate?.value || new Date().toISOString().slice(0,10);
-
-      attendanceSnap.forEach(ad => {
-        const d = ad.data() || {};
-        // if attendance docs carry a date field, match by date; otherwise consider last saved
-        if (!d.date || d.date === today) {
-          attendanceMap[ad.id] = !!d.present;
-        }
-      });
-
-      // build rows
-      studentDocs.forEach(snap => {
-        const s = snap.data() || {};
-        const sid = snap.id;
-        const presentChecked = attendanceMap[sid] ? "checked" : "";
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${escapeHtml(String(s.name || "-"))}</td>
-          <td>${escapeHtml(String(s.level !== undefined ? s.level : "-"))}</td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" data-student-id="${sid}" ${presentChecked}/>
-              <span class="slider"></span>
-            </label>
-          </td>
-        `;
-        studentsTbody.appendChild(tr);
-      });
-
-    } catch (err) {
-      console.error("Error loading students for lesson:", err);
-      studentsTbody.innerHTML = `<tr><td colspan="3">حدث خطأ أثناء تحميل طلاب الحصة</td></tr>`;
+    const studentsDocs = await fetchStudentsByLevelSafe(L.level);
+    if (!studentsDocs.length) {
+      studentsTbody.innerHTML = `<tr><td colspan="4">لا يوجد طلاب</td></tr>`;
+      return;
     }
+
+    // load attendance
+    const attendanceCol = collection(db, "lessons", currentLessonId, "attendance");
+    const attendanceSnap = await getDocs(attendanceCol);
+    const attendanceMap = {};
+    const today = attendanceDate.value;
+
+    attendanceSnap.forEach(ad => {
+      const d = ad.data();
+      if (!d.date || d.date === today) {
+        attendanceMap[ad.id] = {
+          present: !!d.present,
+          paid: d.paid === undefined ? true : !!d.paid
+        };
+      }
+    });
+
+    // build rows
+    studentsDocs.forEach(s => {
+      const data = s.data();
+      const sid = s.id;
+
+      const presentChecked = attendanceMap[sid]?.present ? "checked" : "";
+      const paidChecked = attendanceMap[sid]?.paid !== false ? "checked" : "";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(data.name || "-")}</td>
+        <td>${escapeHtml(data.level || "-")}</td>
+
+        <td>
+          <label class="switch">
+            <input type="checkbox" data-type="present" data-student-id="${sid}" ${presentChecked}/>
+            <span class="slider"></span>
+          </label>
+        </td>
+
+        <td>
+          <label class="switch">
+            <input type="checkbox" data-type="paid" data-student-id="${sid}" ${paidChecked}/>
+            <span class="slider"></span>
+          </label>
+        </td>
+      `;
+
+      studentsTbody.appendChild(tr);
+    });
   });
 }
 
-/* ======= Clear selections ======= */
+/* ======= Clear ======= */
 if (clearAttendanceBtn) {
   clearAttendanceBtn.addEventListener("click", () => {
-    const checks = studentsTbody.querySelectorAll('input[type="checkbox"]');
+    const checks = studentsTbody.querySelectorAll("input[type='checkbox']");
     checks.forEach(c => c.checked = false);
   });
 }
@@ -230,48 +195,40 @@ if (clearAttendanceBtn) {
 /* ======= Save attendance ======= */
 if (saveAttendanceBtn) {
   saveAttendanceBtn.addEventListener("click", async () => {
-    if (!currentLessonId) {
-      alert("قم بتحميل طلاب الحصة أولاً.");
-      return;
-    }
-    const dateStr = attendanceDate?.value;
-    if (!dateStr) {
-      alert("اختر تاريخ الحضور");
-      return;
-    }
+    if (!currentLessonId) return alert("قم بتحميل طلاب الحصة أولاً");
 
-    const checks = studentsTbody.querySelectorAll('input[type="checkbox"]');
-    if (!checks || checks.length === 0) {
-      alert("لا يوجد طلاب للحفظ");
-      return;
-    }
+    const dateStr = attendanceDate.value;
+    const checks = studentsTbody.querySelectorAll("input[data-type='present']");
+    if (!checks.length) return alert("لا يوجد طلاب");
 
-    try {
-      const promises = [];
-      checks.forEach(ch => {
-        const studentId = ch.dataset.studentId;
-        const present = !!ch.checked;
+    const promises = [];
 
-        const ref = doc(db, "lessons", currentLessonId, "attendance", studentId);
-        const payload = {
-          present,
-          date: dateStr,
-          teacherUid: currentUser ? currentUser.uid : null,
-          updatedAt: new Date().toISOString()
-        };
-        promises.push(setDoc(ref, payload, { merge: true }));
-      });
+    checks.forEach(presentBox => {
+      const studentId = presentBox.dataset.studentId;
 
-      await Promise.all(promises);
-      alert("تم حفظ الحضور بنجاح ✅");
-    } catch (err) {
-      console.error("Save attendance error:", err);
-      alert("حدث خطأ أثناء الحفظ. افتح Console للمزيد.");
-    }
+      const paidBox = document.querySelector(`input[data-student-id="${studentId}"][data-type="paid"]`);
+      const present = !!presentBox.checked;
+      const paid = !!paidBox.checked;
+
+      const ref = doc(db, "lessons", currentLessonId, "attendance", studentId);
+
+      const payload = {
+        present,
+        paid,
+        date: dateStr,
+        teacherUid: currentUser.uid,
+        updatedAt: new Date().toISOString()
+      };
+
+      promises.push(setDoc(ref, payload, { merge: true }));
+    });
+
+    await Promise.all(promises);
+    alert("تم حفظ الحضور بنجاح ✔️");
   });
 }
 
-/* ======= Utility: escape HTML to avoid injection in table cells ======= */
+/* escape HTML */
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
